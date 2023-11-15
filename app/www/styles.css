@@ -1,0 +1,20 @@
+@font-face {
+  font-family: 'Vina Sans';
+  src: url('fonts/VinaSans-Regular.ttf') format('truetype');  
+  font-weight: 800;
+}
+
+.custom-box {
+  background-color: #B9D9EB;
+  border: none;
+  border-radius: 20px;
+  box-shadow: 3px 3px 3px  rgba(139, 69, 19, 0.5);
+}
+
+.box-title{
+  font-family: 'Vina Sans', sans-serif;
+  color: rgb(111, 78, 55);
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
