@@ -32,3 +32,8 @@
 .tooltip.bs-tooltip-top .tooltip-arrow::before {
   border-top-color: #336699;
 }
+.custom-submit{
+  float: right;
+  border-radius: 15px;
+  background-color:  rgb(111, 78, 55);
+}
