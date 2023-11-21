@@ -21,11 +21,11 @@ ui <- navbarPage(
     icon = icon("droplet"),
     fluidPage(
       column(
-        width = 8,
+        width = 7,
         uiOutput("set_arguments")
       ),
       column(
-        width = 4,
+        width = 5,
         box(
           width = NULL, title = "About", class = "custom-box",
           p(
@@ -37,12 +37,14 @@ ui <- navbarPage(
               of water from the land surface directly into the atmosphere, and transpiration, 
               which is the release of water vapor from plants through their leaves."
           ),
-          HTML(katex_html(
-            "\\lambda{ET} = \\frac{ \\Delta (R_n - G) + \\rho_a c_p \\frac{(e_s - e_a)}{r_a} }{\\Delta + \\gamma(1 + \\frac{r_s}{r_a})}",
-            displayMode = TRUE, 
-            preview = FALSE,
-            include_css = TRUE,
-            output = "html")
+          div(
+              HTML(katex_html(
+              "ET_{0} = \\frac{\\Delta}{\\Delta + \\gamma}\\left(R_n - G\\right) + \\frac{\\left(\\frac{\\gamma}{\\Delta + \\gamma}\\right)6.43(1.0 + 0.53u_2)(e_s - e_d)}{\\lambda}",
+              displayMode = TRUE, 
+              preview = FALSE,
+              include_css = TRUE,
+              output = "html")
+            )
           ),
           uiOutput("plot_by")
           

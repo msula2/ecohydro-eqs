@@ -11,8 +11,8 @@ server <- function(input, output, session) {
     tab <- input$navbar
     vars_eqs <- NULL
     if (tab == "Penman-Monteith") {
-      v$vars_plot <- list("R_n"="net_radiation", "G"="ground_heat_flux", "\\lambda" = "latent_heat", "\\gamma" = "psy_constant", "u_2" = "wind_speed", "e_s" = "vapor_sat", "e_d" = "vapor_act")
-      v$vars_def <- list("net_radiation" = "Net Radiation", "ground_heat_flux"="Ground Heat Flux", "latent_heat"="Latent Heat of Vaporation", "psy_constant"="Psychometric Constant", "wind_speed"="Wind Speed 2m above ground", "vapor_sat"="Saturation Vapor Pressure", "vapor_act"= "Actual Vapor Pressure")
+      v$vars_plot <- list("\\Delta" = "slope_saturation","R_n"="net_radiation", "G"="ground_heat_flux", "\\lambda" = "latent_heat", "\\gamma" = "psy_constant", "u_2" = "wind_speed", "e_s - e_d" = "vapor_pressure_deficit")
+      v$vars_def <- list("slope_saturation" = "Slope of the saturation vapor pressure curve with respect to temperature","net_radiation" = "Net Radiation", "ground_heat_flux"="Ground Heat Flux", "latent_heat"="Latent Heat of Vaporation", "psy_constant"="Psychometric Constant", "wind_speed"="Wind Speed 2m above ground", "vapor_pressure_deficit" = "Vapor Pressure Deficit")
       v$output_var <- list(id = "evapo_transpiration", value = "ET_o")  
       v$vars_eqs <- c(names(v$vars_def), v$output_var$id)
     }
@@ -150,12 +150,15 @@ server <- function(input, output, session) {
     result_df <- data.frame(matrix(ncol = length(v$vars_eqs), nrow = length(x_axis_values)))
     colnames(result_df) <- v$vars_eqs
     
-    y_axis_value <- 42
+    if (dependant_var == "evapo_transpiration"){
+      y_axis_values <- (v$slope_saturation / (v$slope_saturation + v$psy_constant)) * (v$net_radiation - v$ground_heat_flux) + (((v$psy_constant / (v$slope_saturation + v$psy_constant)) * 6.43 * (1.0 + 0.53 * v$wind_speed) * (v$vapor_pressure_deficit)) / v$latent_heat)
+    }
+   
     for (j in seq_along(v$vars_eqs)) {
       if (v$vars_eqs[j] == input$plot_type) {
         result_df[, v$vars_eqs[j]] <- x_axis_values
       } else if (v$vars_eqs[j] == dependant_var) {
-        result_df[, v$vars_eqs[j]] <- y_axis_value
+        result_df[, v$vars_eqs[j]] <- y_axis_values
       } else {
         result_df[, v$vars_eqs[j]] <- input[[v$vars_eqs[j]]]
       }
