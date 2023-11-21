@@ -2,6 +2,8 @@ library(shiny)
 library(shinythemes)
 library(katex)
 library(shinydashboard)
+library(ggplot2)
+library(ggthemes)
 # Define UI for application
 ui <- navbarPage(
   "Equations in Ecohydrology",
@@ -11,7 +13,8 @@ ui <- navbarPage(
     tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
     tags$link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.css", integrity="sha384-9tPv11A+glH/on/wEu99NVwDPwkMQESOocs/ZGXPoIiLE8MU/qkqUcZ3zzL+6DuH", crossorigin="anonymous"),
     tags$script(src="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.js", integrity="sha384-U8Vrjwb8fuHMt6ewaCy8uqeUXv4oitYACKdB0VziCerzt011iQ/0TqlSlv8MReCm", crossorigin="anonymous"),
-    tags$style("body{background-color: rgba(139, 69, 19, 0.4);}")
+    tags$style("body{background-color: rgba(139, 69, 19, 0.4);}
+               .katex { font: normal 1.1em KaTeX_Main, Times New Roman, serif !important; }")
   ),
   collapsible = TRUE,
   inverse = TRUE,
@@ -22,6 +25,7 @@ ui <- navbarPage(
     fluidPage(
       column(
         width = 7,
+        uiOutput("plot_box"),
         uiOutput("set_arguments")
       ),
       column(
@@ -43,7 +47,8 @@ ui <- navbarPage(
               displayMode = TRUE, 
               preview = FALSE,
               include_css = TRUE,
-              output = "html")
+              output = "html"
+              )
             )
           ),
           uiOutput("plot_by")

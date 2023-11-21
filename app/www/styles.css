@@ -3,11 +3,23 @@
   src: url('fonts/VinaSans-Regular.ttf') format('truetype');  
   font-weight: 800;
 }
+.form-control{
+  border: 1px solid  rgba(139, 69, 19, 0.5);
+}
+.form-control:focus{
+  border-color:  rgb(111, 78, 55) !important;
+  border: 2px solid;
+}
 .navbar-inverse .navbar-brand{
   font-family: 'Vina Sans', sans-serif;
   letter-spacing: 1px;
   padding: 14.5px 23px;
   font-size: 29px;
+  text-shadow: 
+    -1px -1px 0 rgb(111, 78, 55),  
+     1px -1px 0 rgb(111, 78, 55),
+    -1px  1px 0 rgb(111, 78, 55),
+     1px  1px 0 rgb(111, 78, 55);
 }
 .custom-box {
   background-color: #B9D9EB;
@@ -22,5 +34,15 @@
   font-weight: 800;
   letter-spacing: 1px;
 }
+.submit-btn{
+   float: right; 
+   border-radius: 10px; 
+   background-color:  #18bc9c;
+   border: none;
+   box-shadow: 1px 1px 1px #2c3e50;
 
+}
+.submit-btn:hover{
+  background-color: #097969;
+}
 

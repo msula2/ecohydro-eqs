@@ -4,6 +4,7 @@ server <- function(input, output, session) {
     vars_def = NULL,
     output_var = NULL,
     vars_eqs = NULL,
+    vars_axis = NULL,
     data = NULL
   )
   
@@ -15,6 +16,7 @@ server <- function(input, output, session) {
       v$vars_def <- list("slope_saturation" = "Slope of the saturation vapor pressure curve with respect to temperature","net_radiation" = "Net Radiation", "ground_heat_flux"="Ground Heat Flux", "latent_heat"="Latent Heat of Vaporation", "psy_constant"="Psychometric Constant", "wind_speed"="Wind Speed 2m above ground", "vapor_pressure_deficit" = "Vapor Pressure Deficit")
       v$output_var <- list(id = "evapo_transpiration", value = "ET_o")  
       v$vars_eqs <- c(names(v$vars_def), v$output_var$id)
+      v$vars_axis <- list("slope_saturation" = "Slope saturation (kPa/°C)","net_radiation" = "Net Radiation (MJ/m²/d )", "ground_heat_flux"="Ground Heat Flux (MJ/m²/d )", "latent_heat"="Latent Heat of Vaporation (MJ/kg)", "psy_constant"="Psychometric Constant (kPa/°C)", "wind_speed"="Wind Speed 2m above ground (m/s)", "vapor_pressure_deficit" = "Vapor Pressure Deficit", "evapo_transpiration" = "Evapotranspiration (mm/day)")
     }
     
     
@@ -72,9 +74,8 @@ server <- function(input, output, session) {
         fluidRow(
           actionButton(
             inputId = "submit",
-            icon = icon("check"),
-            label = "Submit",
-            style = " float: right; border-radius: 15px; background-color:  rgb(111, 78, 55);"
+            label = HTML("Submit <i class='fas fa-check' style='margin-left: 2px'></i>"),
+            class = "submit-btn"
           )  
         )
         
@@ -166,7 +167,38 @@ server <- function(input, output, session) {
     
     v$data <- result_df
     
-  })  
+    output$plot_box <- renderUI({
+      box(
+        width = NULL, title = "Plot", class = "custom-box",
+        plotOutput("plot_relationship")
+      )
+    })
+    
+    output$plot_relationship <- renderPlot({
+      if (nrow(v$data)) {
+        x_axis_title <- v$vars_axis[[independant_var]]
+        y_axis_title <- v$vars_axis[[dependant_var]]
+        ggplot(v$data, aes(x = .data[[independant_var]], y = .data[[dependant_var]])) +
+          geom_line(color = "#097969", size = 1.4) +
+          scale_x_continuous(name = x_axis_title) +
+          scale_y_continuous(name = y_axis_title) +
+          theme_tufte() +
+          theme(
+                plot.margin = margin(30, 40, 30, 30, unit = "pt"),
+                text = element_text(family = "Lato"),
+                title = element_text(size = 9),
+                axis.title = element_text(size = 12),
+                axis.text = element_text(size = 8),
+                panel.grid.major = element_line(color = "gray", linetype = "dashed"),
+                panel.grid.minor = element_blank(),
+                panel.background = element_rect(fill = "white"))+
+          labs(title = paste("Relationship between", x_axis_title, "and", y_axis_title))
+      }
+    })
+    
+  })
+  
+  
   
   
   
