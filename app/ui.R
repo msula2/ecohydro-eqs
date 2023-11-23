@@ -2,8 +2,13 @@ library(shiny)
 library(shinythemes)
 library(katex)
 library(shinydashboard)
+library(plotly)
 library(ggplot2)
 library(ggthemes)
+library(tidyverse)
+library(dplyr)
+library(kableExtra)
+library(knitr)
 # Define UI for application
 ui <- navbarPage(
   "Equations in Ecohydrology",

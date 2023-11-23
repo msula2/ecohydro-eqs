@@ -141,11 +141,9 @@ server <- function(input, output, session) {
     for (dv in default_vars){
       v[[dv]] <- as.numeric(input[[dv]])
     }
-    independant_var <- setdiff(names(v$vars_def), default_vars)
+    independant_var <- input$plot_type
     
-    for (indp in independant_var) {
-      v[[indp]] <- x_axis_values
-    }
+    v[[independant_var]] <- x_axis_values
     
     # Initialize an empty data frame to store the results
     result_df <- data.frame(matrix(ncol = length(v$vars_eqs), nrow = length(x_axis_values)))
@@ -167,19 +165,86 @@ server <- function(input, output, session) {
     
     v$data <- result_df
     
+    
     output$plot_box <- renderUI({
       box(
-        width = NULL, title = "Plot", class = "custom-box",
-        plotOutput("plot_relationship")
+        width = 12, title = "Results", class = "custom-box",
+        tabBox(
+          width = NULL,
+          title = "",
+          tabPanel(
+            title = "Graph",
+            plotlyOutput("plot_relationship")
+          ),
+          tabPanel(
+            title = "Summary",
+            div(
+              uiOutput("args_table"),
+              style = "overflow-x: auto; overflow-y: auto; width: 100%; background-color: white !important; padding: 12px;"
+            )
+          ),
+          tabPanel(
+            title = "Table",
+            div(
+              DT::dataTableOutput("data_table"),
+              style = "overflow-x: auto; overflow-y: auto; width: 100%; background-color: white !important; padding: 12px;"
+            )
+          )
+        )
       )
+      
+
     })
     
-    output$plot_relationship <- renderPlot({
+    output$args_table <- renderUI(
+      {
+        default_table <- v$data %>% 
+          select(default_vars) %>% 
+          summarise_all(max)
+        
+        select_vals <- c(independant_var, dependant_var)
+        results_table <- v$data %>% 
+          select(select_vals) %>% 
+          summarise_all(~sprintf("%s to %s", min(.), max(.)))
+        
+        args_table <- bind_cols(default_table, results_table)
+        
+        colnames_units <- lapply(colnames(args_table), function(colname) {
+          return(v$vars_axis[[colname]])
+        })
+        
+        colnames(args_table) <- colnames_units
+        
+        args_table <- args_table %>%
+          pivot_longer(cols = everything(), names_to = "Argument", values_to = "Value")
+        
+        
+        
+        kable_styled <- kbl(args_table) %>%
+          kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive", "bordered"))
+        
+        return(HTML(kable_styled))
+      }
+    )
+    
+    output$data_table <- DT::renderDataTable({
+      v$data %>% select(independant_var, dependant_var)
+    }, options = list(
+      pageLength = 5,
+      lengthMenu = c(5,10, 25, 50, 100),
+      searching = FALSE
+      
+      ),
+      caption = "Results"
+    )
+    
+    output$plot_relationship <- renderPlotly({
       if (nrow(v$data)) {
         x_axis_title <- v$vars_axis[[independant_var]]
         y_axis_title <- v$vars_axis[[dependant_var]]
-        ggplot(v$data, aes(x = .data[[independant_var]], y = .data[[dependant_var]])) +
-          geom_line(color = "#097969", size = 1.4) +
+          ggplot(v$data, aes(x = .data[[independant_var]], y = .data[[dependant_var]])) +
+          geom_line(color = "#18bc9c", size = 0.8) +
+          geom_point(color = "#097969", size = 1.6) +
           scale_x_continuous(name = x_axis_title) +
           scale_y_continuous(name = y_axis_title) +
           theme_tufte() +

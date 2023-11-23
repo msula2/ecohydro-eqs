@@ -1,0 +1,12 @@
+name: ecohydro-eqs
+title: ecohydro-eqs
+username: msula2
+account: msula2
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 10608300
+bundleId: 7960160
+url: https://msula2.shinyapps.io/ecohydro-eqs/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
