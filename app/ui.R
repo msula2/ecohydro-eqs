@@ -15,11 +15,15 @@ ui <- navbarPage(
   id = "navbar",
   tags$head(
     tags$link(rel = "stylesheet", type = "text/css", href = "fontawesome/all.min.css"),
-    tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
     tags$link(rel="stylesheet", type="text/css" , href="katex/katex.min.css"),
     tags$script(src="katex/katex.min.js"),
+    tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
     tags$style("body{background-color: rgba(139, 69, 19, 0.4);}
-               .katex { font: normal 1.25vw KaTeX_Main, Times New Roman, serif !important; }")
+               .katex { font: normal 1.25vw KaTeX_Main, Times New Roman, serif !important; }
+               #results_tab a{color: #2c3e50;}
+               .fa-droplet{color: #89CFF0;}
+               .navbar-inverse .navbar-brand:hover{color: white;}
+               table-bordered > tr{border: 1px solid !important;}")
   ),
   collapsible = TRUE,
   inverse = TRUE,

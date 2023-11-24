@@ -3,6 +3,9 @@
   src: url('fonts/VinaSans-Regular.ttf') format('truetype');  
   font-weight: 800;
 }
+.table-bordered {
+  border: none !important;
+}
 .form-control{
   border: 1px solid  rgba(139, 69, 19, 0.5);
 }
@@ -15,11 +18,7 @@
   letter-spacing: 1px;
   padding: 14.5px 23px;
   font-size: 29px;
-  text-shadow: 
-    -1px -1px 0 rgb(111, 78, 55),  
-     1px -1px 0 rgb(111, 78, 55),
-    -1px  1px 0 rgb(111, 78, 55),
-     1px  1px 0 rgb(111, 78, 55);
+  text-shadow: -2px 1px 0 #097969;
 }
 .custom-box {
   background-color: #B9D9EB;
@@ -45,4 +44,3 @@
 .submit-btn:hover{
   background-color: #097969;
 }
-

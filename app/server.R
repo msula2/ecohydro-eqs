@@ -135,28 +135,28 @@ server <- function(input, output, session) {
   
   observeEvent(input$submit, {
     x_axis_values <- seq(input$min, input$max, length.out = 10)
-    dependant_var <- v$output_var$id
+    dependent_var <- v$output_var$id
     
     default_vars <- setdiff(names(v$vars_def), input$plot_type)
     for (dv in default_vars){
       v[[dv]] <- as.numeric(input[[dv]])
     }
-    independant_var <- input$plot_type
+    independent_var <- input$plot_type
     
-    v[[independant_var]] <- x_axis_values
+    v[[independent_var]] <- x_axis_values
     
     # Initialize an empty data frame to store the results
     result_df <- data.frame(matrix(ncol = length(v$vars_eqs), nrow = length(x_axis_values)))
     colnames(result_df) <- v$vars_eqs
     
-    if (dependant_var == "evapo_transpiration"){
+    if (dependent_var == "evapo_transpiration"){
       y_axis_values <- (v$slope_saturation / (v$slope_saturation + v$psy_constant)) * (v$net_radiation - v$ground_heat_flux) + (((v$psy_constant / (v$slope_saturation + v$psy_constant)) * 6.43 * (1.0 + 0.53 * v$wind_speed) * (v$vapor_pressure_deficit)) / v$latent_heat)
     }
     
     for (j in seq_along(v$vars_eqs)) {
       if (v$vars_eqs[j] == input$plot_type) {
         result_df[, v$vars_eqs[j]] <- x_axis_values
-      } else if (v$vars_eqs[j] == dependant_var) {
+      } else if (v$vars_eqs[j] == dependent_var) {
         result_df[, v$vars_eqs[j]] <- y_axis_values
       } else {
         result_df[, v$vars_eqs[j]] <- input[[v$vars_eqs[j]]]
@@ -171,6 +171,7 @@ server <- function(input, output, session) {
         width = 12, title = "Results", class = "custom-box",
         tabBox(
           width = NULL,
+          id = "results_tab",
           title = "",
           tabPanel(
             title = "Graph",
@@ -180,14 +181,7 @@ server <- function(input, output, session) {
             title = "Summary",
             div(
               uiOutput("args_table"),
-              style = "overflow-x: auto; overflow-y: auto; width: 100%; background-color: white !important; padding: 12px;"
-            )
-          ),
-          tabPanel(
-            title = "Table",
-            div(
-              DT::dataTableOutput("data_table"),
-              style = "overflow-x: auto; overflow-y: auto; width: 100%; background-color: white !important; padding: 12px;"
+              style = "overflow-x: auto; overflow-y: auto; width: 100%; background-color: white !important; padding: 12px; border: 1px solid #2c3e50;"
             )
           )
         )
@@ -202,7 +196,7 @@ server <- function(input, output, session) {
           select(default_vars) %>% 
           summarise_all(max)
         
-        select_vals <- c(independant_var, dependant_var)
+        select_vals <- c(independent_var, dependent_var)
         results_table <- v$data %>% 
           select(select_vals) %>% 
           summarise_all(~sprintf("%s to %s", min(.), max(.)))
@@ -227,37 +221,26 @@ server <- function(input, output, session) {
       }
     )
     
-    output$data_table <- DT::renderDataTable({
-      v$data %>% select(independant_var, dependant_var)
-    }, options = list(
-      pageLength = 5,
-      lengthMenu = c(5,10, 25, 50, 100),
-      searching = FALSE
-      
-      ),
-      caption = "Results"
-    )
-    
     output$plot_relationship <- renderPlotly({
       if (nrow(v$data)) {
-        x_axis_title <- v$vars_axis[[independant_var]]
-        y_axis_title <- v$vars_axis[[dependant_var]]
-          ggplot(v$data, aes(x = .data[[independant_var]], y = .data[[dependant_var]])) +
+        x_axis_title <- v$vars_axis[[independent_var]]
+        y_axis_title <- v$vars_axis[[dependent_var]]
+          ggplot(v$data, aes(x = .data[[independent_var]], y = .data[[dependent_var]])) +
           geom_line(color = "#18bc9c", size = 0.8) +
           geom_point(color = "#097969", size = 1.6) +
           scale_x_continuous(name = x_axis_title) +
           scale_y_continuous(name = y_axis_title) +
-          theme_tufte() +
           theme(
             plot.margin = margin(30, 40, 30, 30, unit = "pt"),
             text = element_text(family = "Lato"),
             title = element_text(size = 9),
-            axis.title = element_text(size = 12),
-            axis.text = element_text(size = 8),
-            panel.grid.major = element_line(color = "gray", linetype = "dashed"),
+            axis.title = element_text(size = 10),
+            axis.text = element_text(size = 9),
             panel.grid.minor = element_blank(),
-            panel.background = element_rect(fill = "white"))+
-          labs(title = paste("Relationship between", x_axis_title, "and", y_axis_title))
+            panel.background = element_rect(fill = "white"),
+            panel.grid.major = element_line(color = "gray", linetype = "dashed"),
+            )+
+            ggtitle(paste("Relationship between", x_axis_title, "and", y_axis_title))
       }
     })
     
