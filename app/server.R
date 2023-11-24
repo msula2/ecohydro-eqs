@@ -1,4 +1,5 @@
 server <- function(input, output, session) {
+
   v <- reactiveValues(
     vars_plot = NULL,
     vars_def = NULL,
@@ -7,6 +8,25 @@ server <- function(input, output, session) {
     vars_axis = NULL,
     data = NULL
   )
+  
+  observe({
+    if (!is.null(v$vars_axis)){
+      for (val in names(v$vars_def)){
+        if (!is.null(input$plot_type) && val != input$plot_type){
+          value_entered <- input[[val]]
+          print(paste(length(value_entered), val))
+          if (!is.null(value_entered) && value_entered != ""){
+            num <- as.numeric(value_entered)
+            if (is.na(num)) {
+              showNotification(paste("Error:", "Only numbers are allowed"), type = "error")
+            }
+          }   
+        }
+        
+      }
+      
+    }
+  })  
   
   observeEvent(input$navbar,{
     tab <- input$navbar
@@ -181,7 +201,7 @@ server <- function(input, output, session) {
             title = "Summary",
             div(
               uiOutput("args_table"),
-              style = "overflow-x: auto; overflow-y: auto; width: 100%; background-color: white !important; padding: 12px; border: 1px solid #2c3e50;"
+              style = "overflow-x: auto; overflow-y: auto; width: 100%; background-color: white !important; padding: 15px;"
             )
           )
         )

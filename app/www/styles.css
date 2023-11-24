@@ -44,3 +44,7 @@
 .submit-btn:hover{
   background-color: #097969;
 }
+table-bordered>thead>tr>th, .table-bordered>thead>tr>th, table-bordered>tbody>tr>th, .table-bordered>tbody>tr>th, table-bordered>tfoot>tr>th, .table-bordered>tfoot>tr>th, table-bordered>thead>tr>td, .table-bordered>thead>tr>td, table-bordered>tbody>tr>td, .table-bordered>tbody>tr>td, table-bordered>tfoot>tr>td, .table-bordered>tfoot>tr>td {
+
+  border: 1px solid  #2c3e50 !important;
+}

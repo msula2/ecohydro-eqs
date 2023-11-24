@@ -9,6 +9,7 @@ library(tidyverse)
 library(dplyr)
 library(kableExtra)
 library(knitr)
+library(shinyjs)
 # Define UI for application
 ui <- navbarPage(
   "Equations in Ecohydrology",
@@ -16,6 +17,7 @@ ui <- navbarPage(
   tags$head(
     tags$link(rel = "stylesheet", type = "text/css", href = "fontawesome/all.min.css"),
     tags$link(rel="stylesheet", type="text/css" , href="katex/katex.min.css"),
+    tags$script(src = "https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.6/jquery.inputmask.min.js"),
     tags$script(src="katex/katex.min.js"),
     tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
     tags$style("body{background-color: rgba(139, 69, 19, 0.4);}
@@ -32,6 +34,7 @@ ui <- navbarPage(
     "Penman-Monteith",
     icon = icon("droplet"),
     fluidPage(
+      useShinyjs(),
       column(
         width = 7,
         uiOutput("plot_box"),
