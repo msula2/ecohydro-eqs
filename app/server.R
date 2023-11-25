@@ -1,31 +1,57 @@
 server <- function(input, output, session) {
-
+  
   v <- reactiveValues(
     vars_plot = NULL,
     vars_def = NULL,
     output_var = NULL,
     vars_eqs = NULL,
     vars_axis = NULL,
-    data = NULL
+    data = NULL,
+    enable_submit = TRUE
   )
   
   observe({
+    v$enable_submit = TRUE
     if (!is.null(v$vars_axis)){
       for (val in names(v$vars_def)){
         if (!is.null(input$plot_type) && val != input$plot_type){
           value_entered <- input[[val]]
-          print(paste(length(value_entered), val))
-          if (!is.null(value_entered) && value_entered != ""){
-            num <- as.numeric(value_entered)
-            if (is.na(num)) {
-              showNotification(paste("Error:", "Only numbers are allowed"), type = "error")
+          if (!is.null(value_entered)){
+            if (value_entered != ""){
+              num <- as.numeric(value_entered)
+              if (is.na(num)) {
+                showNotification(paste("Error:", "Only numbers are allowed"), type = "error")
+                v$enable_submit = FALSE
+              }   
             }
+            else{
+              v$enable_submit = FALSE
+            }
+            
           }   
         }
         
       }
-      
     }
+    if (is.null(input$min) && is.null(input$min)){
+      v$enable_submit = FALSE
+    }
+    else{
+      if (input$max <= input$min){
+        v$enable_submit = FALSE
+        if (input$max != "" && input$min != ""){
+          showNotification(paste("Error:", "Maximum value must be greater than minimum value"), type = "error") 
+        }
+        
+      }
+    }
+    if(v$enable_submit){
+      enable("submit")
+    }
+    else{
+      disable("submit")
+    }
+    
   })  
   
   observeEvent(input$navbar,{
@@ -199,7 +225,7 @@ server <- function(input, output, session) {
           ),
           tabPanel(
             title = "Summary",
-            div(
+            tags$div(
               uiOutput("args_table"),
               style = "overflow-x: auto; overflow-y: auto; width: 100%; background-color: white !important; padding: 15px;"
             )
@@ -207,21 +233,34 @@ server <- function(input, output, session) {
         )
       )
       
-
+      
     })
     
     output$args_table <- renderUI(
       {
         default_table <- v$data %>% 
-          select(default_vars) %>% 
+          select(all_of(default_vars)) %>% 
           summarise_all(max)
         
         select_vals <- c(independent_var, dependent_var)
         results_table <- v$data %>% 
-          select(select_vals) %>% 
+          select(all_of(select_vals)) %>% 
           summarise_all(~sprintf("%s to %s", min(.), max(.)))
         
         args_table <- bind_cols(default_table, results_table)
+        
+        mapping <- setNames(names(v$vars_plot), v$vars_plot)
+        
+        symbols_latex_col <- lapply(colnames(args_table), function(colname) {
+          symbol <- NULL
+          if (colname != v$output_var$id){
+            symbol <- mapping[colname]
+          }
+          else{
+            symbol <- v$output_var$value
+          }
+          return(HTML(katex_html(symbol, displayMode = FALSE)))
+        })
         
         colnames_units <- lapply(colnames(args_table), function(colname) {
           return(v$vars_axis[[colname]])
@@ -234,8 +273,14 @@ server <- function(input, output, session) {
         
         
         
-        kable_styled <- kbl(args_table) %>%
-          kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive", "bordered"))
+        args_table <- args_table %>%
+          mutate(Symbol = symbols_latex_col)
+        
+        args_table_df <- as.data.frame(args_table)
+        
+        
+        kable_styled <- kable(args_table_df, format = "html", escape = FALSE) %>%
+          kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive", "bordered"), full_width = FALSE)
         
         return(HTML(kable_styled))
       }
@@ -245,7 +290,7 @@ server <- function(input, output, session) {
       if (nrow(v$data)) {
         x_axis_title <- v$vars_axis[[independent_var]]
         y_axis_title <- v$vars_axis[[dependent_var]]
-          ggplot(v$data, aes(x = .data[[independent_var]], y = .data[[dependent_var]])) +
+        ggplot(v$data, aes(x = .data[[independent_var]], y = .data[[dependent_var]])) +
           geom_line(color = "#18bc9c", size = 0.8) +
           geom_point(color = "#097969", size = 1.6) +
           scale_x_continuous(name = x_axis_title) +
@@ -259,8 +304,8 @@ server <- function(input, output, session) {
             panel.grid.minor = element_blank(),
             panel.background = element_rect(fill = "white"),
             panel.grid.major = element_line(color = "gray", linetype = "dashed"),
-            )+
-            ggtitle(paste("Relationship between", x_axis_title, "and", y_axis_title))
+          )+
+          ggtitle(paste("Relationship between", x_axis_title, "and", y_axis_title))
       }
     })
     
