@@ -37,6 +37,7 @@ ui <- navbarPage(
       useShinyjs(),
       column(
         width = 7,
+        tags$span(id = "placeholder"),
         uiOutput("plot_box"),
         uiOutput("set_arguments")
       ),

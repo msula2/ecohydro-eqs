@@ -180,6 +180,7 @@ server <- function(input, output, session) {
   })
   
   observeEvent(input$submit, {
+    v$data <- NULL
     x_axis_values <- seq(input$min, input$max, length.out = 10)
     dependent_var <- v$output_var$id
     
@@ -197,6 +198,7 @@ server <- function(input, output, session) {
     
     if (dependent_var == "evapo_transpiration"){
       y_axis_values <- (v$slope_saturation / (v$slope_saturation + v$psy_constant)) * (v$net_radiation - v$ground_heat_flux) + (((v$psy_constant / (v$slope_saturation + v$psy_constant)) * 6.43 * (1.0 + 0.53 * v$wind_speed) * (v$vapor_pressure_deficit)) / v$latent_heat)
+    
     }
     
     for (j in seq_along(v$vars_eqs)) {
@@ -215,6 +217,7 @@ server <- function(input, output, session) {
     output$plot_box <- renderUI({
       box(
         width = 12, title = "Results", class = "custom-box",
+        actionButton(inputId = "reset", label = "Reset", class = "reset-btn"),
         tabBox(
           width = NULL,
           id = "results_tab",
@@ -245,7 +248,7 @@ server <- function(input, output, session) {
         select_vals <- c(independent_var, dependent_var)
         results_table <- v$data %>% 
           select(all_of(select_vals)) %>% 
-          summarise_all(~sprintf("%s to %s", min(.), max(.)))
+          summarise_all(~sprintf("%s to %s", round(min(.), digits = 3), round(max(.), digits = 3)))
         
         args_table <- bind_cols(default_table, results_table)
         
@@ -308,6 +311,27 @@ server <- function(input, output, session) {
           ggtitle(paste("Relationship between", x_axis_title, "and", y_axis_title))
       }
     })
+    show("plot_box")
+    hide("set_arguments")
+
     
+  })
+  
+  observeEvent(input$reset,{
+    hide("plot_box")
+    for (rv in v$vars_eqs){
+      v[[rv]] <- NULL
+      if (rv != v$output_var$id){
+        if (rv != input$plot_type){
+          updateTextInput(session, rv, value = "")
+        }
+        else{
+          updateTextInput(session, "min", value = "")
+          updateTextInput(session, "max", value = "")
+        }
+      }
+      
+    }
+    show("set_arguments")
   })
 }
