@@ -176,16 +176,40 @@ server <- function(input, output, session) {
             katex_html(mapping[var_id], displayMode = FALSE),
             sprintf('<i class="fa-regular fa-circle-question info" style="margin-left: 5px;" data-toggle="tooltip" data-placement="right" title="%s"></i>', def)
           )
-          return(
-            column(
-              width = 4,
-              textInput(var_id,
-                        label = HTML(label_html),
-                        value = "",
-                        width = "80%"
-              )    
+          if (var_id == "slope_saturation" || var_id == "psy_constant" || var_id == "ground_heat_flux"){
+            return(
+              column(
+                width = 4,
+                fluidRow(
+                  column(
+                    width = 10,
+                    textInput(var_id,
+                              label = HTML(label_html),
+                              value = "",
+                              width = "100%"
+                    )
+                  ),
+                  column(
+                    width = 2,
+                    actionButton(inputId = "calculate", label = "Calculate", class = "calculate-btn")
+                  )
+                )
+              )
             )
-          )
+          }
+          else{
+            return(
+              column(
+                width = 4,
+                textInput(var_id,
+                          label = HTML(label_html),
+                          value = "",
+                          width = "80%"
+                )    
+              )
+            )            
+          }
+
         }
       })
       

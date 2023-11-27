@@ -62,4 +62,16 @@ table-bordered>thead>tr>th, .table-bordered>thead>tr>th, table-bordered>tbody>tr
 .reset-btn:hover{
   background-color: #18bc9c;
 }
+.calculate-btn{
+  margin-left: -100px; 
+  margin-top: -10px;
+  margin-bottom: 2px;
+  padding: 4px 2px;
+  border: 1px solid #097969;
+  background-color:  #097969;
+  
+}
+.calculate-btn:hover{
+  background-color: #18bc9c;
+}
 
