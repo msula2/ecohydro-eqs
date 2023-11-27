@@ -27,7 +27,7 @@
   box-shadow: 3px 3px 3px  rgba(139, 69, 19, 0.5);
   padding: 20px;
 }
-.box-title{
+.box-title, .modal-title{
   font-family: 'Vina Sans', sans-serif;
   color: rgb(111, 78, 55);
   font-weight: 800;
@@ -66,12 +66,25 @@ table-bordered>thead>tr>th, .table-bordered>thead>tr>th, table-bordered>tbody>tr
   margin-left: -100px; 
   margin-top: -10px;
   margin-bottom: 2px;
-  padding: 4px 2px;
+  padding: 4px 4px;
   border: 1px solid #097969;
   background-color:  #097969;
   
 }
 .calculate-btn:hover{
   background-color: #18bc9c;
+}
+.modal-header{
+  background-color: rgba(139, 69, 19, 0.4);
+  border-bottom: 1px solid  #2c3e50;
+}
+.modal-body{
+  background-color: #B9D9EB;
+}
+.modal-footer {
+  padding: 5px;
+  text-align: right;
+  border-top: 1px solid  #2c3e50;
+  background-color: rgba(139, 69, 19, 0.4);
 }
 

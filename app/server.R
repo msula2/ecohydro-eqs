@@ -136,7 +136,8 @@ server <- function(input, output, session) {
           actionButton(
             inputId = "submit",
             label = HTML("Submit <i class='fas fa-check' style='margin-left: 2px'></i>"),
-            class = "submit-btn"
+            class = "submit-btn",
+            disabled = TRUE
           )  
         )
         
@@ -176,7 +177,7 @@ server <- function(input, output, session) {
             katex_html(mapping[var_id], displayMode = FALSE),
             sprintf('<i class="fa-regular fa-circle-question info" style="margin-left: 5px;" data-toggle="tooltip" data-placement="right" title="%s"></i>', def)
           )
-          if (var_id == "slope_saturation" || var_id == "psy_constant" || var_id == "ground_heat_flux"){
+          if (var_id == "slope_saturation" || var_id == "psy_constant" || var_id == "ground_heat_flux" || var_id == "vapor_pressure_deficit"){
             return(
               column(
                 width = 4,
@@ -191,7 +192,7 @@ server <- function(input, output, session) {
                   ),
                   column(
                     width = 2,
-                    actionButton(inputId = "calculate", label = "Calculate", class = "calculate-btn")
+                    actionButton(inputId = paste0("calculate_", var_id), label = HTML("<i class='fa-solid fa-calculator' style = 'color: #2c3e50;'></i>"), style = "background: none; border: none;margin-left: -60px; margin-top: -10px;")
                   )
                 )
               )
@@ -216,6 +217,54 @@ server <- function(input, output, session) {
       fluidRow(inputs)
     })
     
+  })
+  
+  observeEvent(input$calculate_slope_saturation, {
+    showModal(
+      modalDialog(
+        title = "Calculate",
+        footer = tagList(
+          actionButton(inputId = "close", label = "Close", class = "submit-btn")
+        )
+      )
+    )
+  })
+  
+  observeEvent(input$calculate_psy_constant, {
+    showModal(
+      modalDialog(
+        title = "Calculate",
+        footer = tagList(
+          actionButton(inputId = "close", label = "Close", class = "submit-btn")
+        )
+      )
+    )
+  })
+  
+  observeEvent(input$calculate_ground_heat_flux, {
+    showModal(
+      modalDialog(
+        title = "Calculate",
+        footer = tagList(
+          actionButton(inputId = "close", label = "Close", class = "submit-btn")
+        )
+      )
+    )
+  })
+  
+  observeEvent(input$calculate_vapor_pressure_deficit, {
+    showModal(
+      modalDialog(
+        title = "Calculate",
+        footer = tagList(
+          actionButton(inputId = "close", label = "Close", class = "submit-btn")
+        )
+      )
+    )
+  })
+  
+  observeEvent(input$close, {
+    removeModal()
   })
   
   observeEvent(input$submit, {
