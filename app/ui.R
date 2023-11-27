@@ -12,7 +12,7 @@ library(knitr)
 library(shinyjs)
 # Define UI for application
 ui <- navbarPage(
-  "Equations in Ecohydrology",
+  "Evapotranspiration",
   id = "navbar",
   tags$head(
     tags$link(rel = "stylesheet", type = "text/css", href = "fontawesome/all.min.css"),
@@ -31,7 +31,7 @@ ui <- navbarPage(
   inverse = TRUE,
   theme = shinytheme("flatly"),
   tabPanel(
-    "Penman-Monteith",
+    "Penman's Method",
     icon = icon("droplet"),
     fluidPage(
       useShinyjs(),
@@ -46,13 +46,9 @@ ui <- navbarPage(
         box(
           width = NULL, title = "About", class = "custom-box",
           p(
-            "The Penman-Monteith equation is a widely used method for calculating 
-              the evapotranspiration (ET) of water from the land surface into the atmosphere."
-          ),
-          p(
-            " Evapotranspiration is the combined process of evaporation, which is the loss 
-              of water from the land surface directly into the atmosphere, and transpiration, 
-              which is the release of water vapor from plants through their leaves."
+            "Penman (1948) first combined factors to account for a supply of energy and a mechanism to remove the water
+            vapor near the evaporating surface. We should recognize these two factors as the essential ingredients for evapo-
+            ration. Penman derived an equation for a well-watered grass reference crop:"
           ),
           div(
             HTML(katex_html(

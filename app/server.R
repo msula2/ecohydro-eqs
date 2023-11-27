@@ -37,13 +37,28 @@ server <- function(input, output, session) {
       v$enable_submit = FALSE
     }
     else{
-      if (input$max <= input$min){
-        v$enable_submit = FALSE
         if (input$max != "" && input$min != ""){
-          showNotification(paste("Error:", "Maximum value must be greater than minimum value"), type = "error") 
+          num_max <- as.numeric(input$max)
+          num_min <- as.numeric(input$min)
+          if (!is.na(num_max) && !is.na(num_min)){
+            if (input$max <= input$min){
+              v$enable_submit = FALSE 
+              showNotification(paste("Error:", "Maximum value must be greater than minimum value"), type = "error")
+             
+            }  
+          }
+          else{
+            v$enable_submit = FALSE 
+            showNotification(paste("Error:", "Only numbers are allowed"), type = "error")
+            
+          }
+          
+           
+        }
+        else{
+          v$enable_submit = FALSE 
         }
         
-      }
     }
     if(v$enable_submit){
       enable("submit")
@@ -57,7 +72,7 @@ server <- function(input, output, session) {
   observeEvent(input$navbar,{
     tab <- input$navbar
     vars_eqs <- NULL
-    if (tab == "Penman-Monteith") {
+    if (tab == "Penman's Method") {
       v$vars_plot <- list("\\Delta" = "slope_saturation","R_n"="net_radiation", "G"="ground_heat_flux", "\\lambda" = "latent_heat", "\\gamma" = "psy_constant", "u_2" = "wind_speed", "e_s - e_d" = "vapor_pressure_deficit")
       v$vars_def <- list("slope_saturation" = "Slope of the saturation vapor pressure curve with respect to temperature","net_radiation" = "Net Radiation", "ground_heat_flux"="Ground Heat Flux", "latent_heat"="Latent Heat of Vaporation", "psy_constant"="Psychometric Constant", "wind_speed"="Wind Speed 2m above ground", "vapor_pressure_deficit" = "Vapor Pressure Deficit")
       v$output_var <- list(id = "evapo_transpiration", value = "ET_o")  
