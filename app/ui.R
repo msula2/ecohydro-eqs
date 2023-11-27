@@ -25,7 +25,7 @@ ui <- navbarPage(
                #results_tab a{color: #2c3e50;}
                .fa-droplet{color: #89CFF0;}
                .navbar-inverse .navbar-brand:hover{color: white;}
-               table-bordered > tr{border: 1px solid !important;}")
+               .shiny-notification {position:fixed;top: 0;right: 0;}")
   ),
   collapsible = TRUE,
   inverse = TRUE,

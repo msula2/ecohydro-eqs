@@ -311,8 +311,8 @@ server <- function(input, output, session) {
           ggtitle(paste("Relationship between", x_axis_title, "and", y_axis_title))
       }
     })
-    show("plot_box")
     hide("set_arguments")
+    show("plot_box")
 
     
   })
