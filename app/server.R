@@ -192,7 +192,7 @@ server <- function(input, output, session) {
                   ),
                   column(
                     width = 2,
-                    actionButton(inputId = paste0("calculate_", var_id), label = HTML("<i class='fa-solid fa-calculator' style = 'color: #2c3e50;'></i>"), style = "background: none; border: none;margin-left: -60px; margin-top: -10px;")
+                    actionButton(inputId = paste0(var_id, "_box"), label = HTML("<i class='fa-solid fa-calculator' style = 'color: #2c3e50;'></i>"), style = "background: none; border: none;margin-left: -60px; margin-top: -10px;")
                   )
                 )
               )
@@ -219,53 +219,76 @@ server <- function(input, output, session) {
     
   })
   
+  observeEvent(input$slope_saturation_box, {
+    label_html <- paste0(
+      katex_html("T", displayMode = FALSE),
+      sprintf('<i class="fa-regular fa-circle-question info" style="margin-left: 5px;" data-toggle="tooltip" data-placement="right" title="%s"></i>', "Mean Temperature")
+    )
+    showModal(
+      modalDialog(
+        title = "Calculate",
+        div(
+          HTML(katex_html(
+            "\\Delta = 0.200[0.00738 T + 0.8072]^{7} - 0.000116",
+            displayMode = TRUE, 
+            preview = FALSE,
+            include_css = TRUE,
+            output = "html"
+          )
+          )
+        ),
+        textInput("mean_temperature",
+                  label = HTML(label_html),
+                  value = "",
+                  width = "60%"
+        ),
+        footer = tagList(
+          actionButton(inputId = "calculate_slope_saturation", label = "Submit", class = "submit-btn")
+        )
+      )
+    )
+  })
+  
   observeEvent(input$calculate_slope_saturation, {
-    showModal(
-      modalDialog(
-        title = "Calculate",
-        footer = tagList(
-          actionButton(inputId = "close", label = "Close", class = "submit-btn")
-        )
-      )
-    )
-  })
-  
-  observeEvent(input$calculate_psy_constant, {
-    showModal(
-      modalDialog(
-        title = "Calculate",
-        footer = tagList(
-          actionButton(inputId = "close", label = "Close", class = "submit-btn")
-        )
-      )
-    )
-  })
-  
-  observeEvent(input$calculate_ground_heat_flux, {
-    showModal(
-      modalDialog(
-        title = "Calculate",
-        footer = tagList(
-          actionButton(inputId = "close", label = "Close", class = "submit-btn")
-        )
-      )
-    )
-  })
-  
-  observeEvent(input$calculate_vapor_pressure_deficit, {
-    showModal(
-      modalDialog(
-        title = "Calculate",
-        footer = tagList(
-          actionButton(inputId = "close", label = "Close", class = "submit-btn")
-        )
-      )
-    )
-  })
-  
-  observeEvent(input$close, {
+    req(!is.null(input$mean_temperature))
+    result <- 0.200 * (0.00738 * as.numeric(input$mean_temperature) + 0.8072)^7 - 0.000116
+    updateTextInput(session, "slope_saturation", value = as.character(result))
     removeModal()
   })
+  
+  observeEvent(input$psy_constant_box, {
+    showModal(
+      modalDialog(
+        title = "Calculate",
+        footer = tagList(
+          actionButton(inputId = "close", label = "Close", class = "submit-btn")
+        )
+      )
+    )
+  })
+  
+  observeEvent(input$ground_heat_flux_box, {
+    showModal(
+      modalDialog(
+        title = "Calculate",
+        footer = tagList(
+          actionButton(inputId = "close", label = "Close", class = "submit-btn")
+        )
+      )
+    )
+  })
+  
+  observeEvent(input$vapor_pressure_deficit_box, {
+    showModal(
+      modalDialog(
+        title = "Calculate",
+        footer = tagList(
+          actionButton(inputId = "close", label = "Close", class = "submit-btn")
+        )
+      )
+    )
+  })
+  
   
   observeEvent(input$submit, {
     v$data <- NULL

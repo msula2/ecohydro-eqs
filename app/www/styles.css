@@ -41,7 +41,7 @@
    box-shadow: 2px 2px 2px #2c3e50;
 
 }
-.submit-btn:hover{
+.submit-btn:hover, .reset-btn:hover{
   background-color: #18bc9c;
 }
 table-bordered>thead>tr>th, .table-bordered>thead>tr>th, table-bordered>tbody>tr>th, .table-bordered>tbody>tr>th, table-bordered>tfoot>tr>th, .table-bordered>tfoot>tr>th, table-bordered>thead>tr>td, .table-bordered>thead>tr>td, table-bordered>tbody>tr>td, .table-bordered>tbody>tr>td, table-bordered>tfoot>tr>td, .table-bordered>tfoot>tr>td {
@@ -59,21 +59,6 @@ table-bordered>thead>tr>th, .table-bordered>thead>tr>th, table-bordered>tbody>tr
 
 }
 
-.reset-btn:hover{
-  background-color: #18bc9c;
-}
-.calculate-btn{
-  margin-left: -100px; 
-  margin-top: -10px;
-  margin-bottom: 2px;
-  padding: 4px 4px;
-  border: 1px solid #097969;
-  background-color:  #097969;
-  
-}
-.calculate-btn:hover{
-  background-color: #18bc9c;
-}
 .modal-header{
   background-color: rgba(139, 69, 19, 0.4);
   border-bottom: 1px solid  #2c3e50;
