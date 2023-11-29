@@ -119,10 +119,19 @@ server <- function(input, output, session) {
     output$definition <- renderUI({
       def <- v$vars_def[[input$plot_type]]
       label_html <- sprintf('<i class="fa-regular fa-circle-question info" data-toggle="tooltip" data-placement="right" title="%s"></i>', def)
-      div(
-        HTML(label_html)
-      )
-      
+      if (input$plot_type == "slope_saturation" || input$plot_type == "psy_constant" || input$plot_type == "ground_heat_flux" || input$plot_type == "vapor_pressure_deficit"){
+        div(
+          HTML(label_html),
+          actionButton(inputId = paste0(input$plot_type, "_range_box"), label = HTML("<i class='fa-solid fa-calculator' style = 'color: #2c3e50;'></i>"), style = "background: none; border: none;margin-bottom: 5px;")
+          
+        )
+      }
+      else{
+        div(
+          HTML(label_html)
+        )
+      }
+     
     })
     
     output$set_arguments <- renderUI({
@@ -192,7 +201,7 @@ server <- function(input, output, session) {
                   ),
                   column(
                     width = 2,
-                    actionButton(inputId = paste0(var_id, "_box"), label = HTML("<i class='fa-solid fa-calculator' style = 'color: #2c3e50;'></i>"), style = "background: none; border: none;margin-left: -60px; margin-top: -10px;")
+                    actionButton(inputId = paste0(var_id, "_input_box"), label = HTML("<i class='fa-solid fa-calculator' style = 'color: #2c3e50;'></i>"), style = "background: none; border: none;margin-left: -60px; margin-top: -10px;")
                   )
                 )
               )
@@ -219,7 +228,7 @@ server <- function(input, output, session) {
     
   })
   
-  observeEvent(input$slope_saturation_box, {
+  observeEvent(input$slope_saturation_input_box, {
     label_html <- paste0(
       katex_html("T", displayMode = FALSE),
       sprintf('<i class="fa-regular fa-circle-question info" style="margin-left: 5px;" data-toggle="tooltip" data-placement="right" title="%s"></i>', "Mean Temperature")
@@ -227,32 +236,89 @@ server <- function(input, output, session) {
     showModal(
       modalDialog(
         title = "Calculate",
+        uiOutput("slope_saturation_eqs"),
         div(
-          HTML(katex_html(
-            "\\Delta = 0.200[0.00738 T + 0.8072]^{7} - 0.000116",
-            displayMode = TRUE, 
-            preview = FALSE,
-            include_css = TRUE,
-            output = "html"
+          style = "display: flex; align-items: center; justify-content: center;",
+          div(HTML(label_html), style = "margin-right: 15px;"),
+          textInput("mean_temperature",
+                    label = "",
+                    value = "",
+                    width = "20%"
           )
-          )
-        ),
-        textInput("mean_temperature",
-                  label = HTML(label_html),
-                  value = "",
-                  width = "60%"
         ),
         footer = tagList(
           actionButton(inputId = "calculate_slope_saturation", label = "Submit", class = "submit-btn")
         )
       )
     )
+  
+    
+})
+  observeEvent(input$slope_saturation_range_box, {
+    label_html <- paste0(
+      katex_html("T", displayMode = FALSE),
+      sprintf('<i class="fa-regular fa-circle-question info" style="margin-left: 5px;" data-toggle="tooltip" data-placement="right" title="%s"></i>', "Mean Temperature")
+    )
+    showModal(
+      modalDialog(
+        title = "Calculate",
+        uiOutput("slope_saturation_eqs"),
+        div(
+          style = "display: flex; align-items: center; justify-content: center;",
+          textInput("min_mean_temperature", label = "", value = "", width = "10%"),
+          div(HTML(katex_html("\\leq", displayMode = FALSE)),  style = "margin-left: 15px;"),
+          div(HTML(label_html), style = "margin-left: 15px;"),
+          div(HTML(katex_html("\\leq", displayMode = FALSE)),  style = "margin-left: 15px; margin-right: 15px;"),
+          textInput("max_mean_temperature", label = "", value = "", width = "10%")
+        ),
+        footer = tagList(
+          actionButton(inputId = "calculate_slope_saturation", label = "Submit", class = "submit-btn")
+        )
+      )
+    )
+    
+    
   })
+output$slope_saturation_eqs <- renderUI({
+  return(
+    div(
+      p(
+        "The slope of the saturation vapor pressure–temperature curve Δ can be computed if the mean temperature is
+         known using: "
+      ),
+      div(
+        HTML(katex_html(
+          "\\Delta = 0.200[0.00738 T + 0.8072]^{7} - 0.000116",
+          displayMode = TRUE, 
+          preview = FALSE,
+          include_css = TRUE,
+          output = "html"
+        )
+        )
+      ),
+      p(
+        "where Δ is in kilopascals per degree Celsius and T is the mean temperature in degree Celsius."
+      )
+    )
+    
+  )
+  
+})
   
   observeEvent(input$calculate_slope_saturation, {
-    req(!is.null(input$mean_temperature))
-    result <- 0.200 * (0.00738 * as.numeric(input$mean_temperature) + 0.8072)^7 - 0.000116
-    updateTextInput(session, "slope_saturation", value = as.character(result))
+    if (input$plot_type == "slope_saturation"){
+      T <- c(as.numeric(input$min_mean_temperature), as.numeric(input$max_mean_temperature))
+      result <- 0.200 * (0.00738 * T + 0.8072)^7 - 0.000116
+      updateTextInput(session, "min", value = as.character(result[1]))
+      updateTextInput(session, "max", value = as.character(result[2]))
+      
+    }
+    else{
+      T <- as.numeric(input$mean_temperature)
+      result <- 0.200 * (0.00738 * T + 0.8072)^7 - 0.000116
+      updateTextInput(session, "slope_saturation", value = as.character(result))
+    }
+    
     removeModal()
   })
   
@@ -267,7 +333,7 @@ server <- function(input, output, session) {
     )
   })
   
-  observeEvent(input$ground_heat_flux_box, {
+  observeEvent(input$ground_heat_flux_input_box, {
     showModal(
       modalDialog(
         title = "Calculate",
@@ -278,7 +344,7 @@ server <- function(input, output, session) {
     )
   })
   
-  observeEvent(input$vapor_pressure_deficit_box, {
+  observeEvent(input$vapor_pressure_deficit_input_box, {
     showModal(
       modalDialog(
         title = "Calculate",
