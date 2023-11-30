@@ -72,4 +72,12 @@ table-bordered>thead>tr>th, .table-bordered>thead>tr>th, table-bordered>tbody>tr
   border-top: 1px solid  #2c3e50;
   background-color: rgba(139, 69, 19, 0.4);
 }
+button .fa-calculator{
+  transition all 1s;
+  
+}
+button .fa-calculator:hover{
+  transform: scale(1.2);
+  
+}
 

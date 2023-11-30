@@ -286,14 +286,12 @@ output$slope_saturation_eqs <- renderUI({
         "The slope of the saturation vapor pressure–temperature curve Δ can be computed if the mean temperature is
          known using: "
       ),
-      div(
-        HTML(katex_html(
+      HTML(katex_html(
           "\\Delta = 0.200[0.00738 T + 0.8072]^{7} - 0.000116",
           displayMode = TRUE, 
           preview = FALSE,
           include_css = TRUE,
           output = "html"
-        )
         )
       ),
       p(
@@ -307,6 +305,7 @@ output$slope_saturation_eqs <- renderUI({
   
   observeEvent(input$calculate_slope_saturation, {
     if (input$plot_type == "slope_saturation"){
+      req(!is.null(input$min_mean_temperature) && !is.null(input$max_mean_temperature))
       T <- c(as.numeric(input$min_mean_temperature), as.numeric(input$max_mean_temperature))
       result <- 0.200 * (0.00738 * T + 0.8072)^7 - 0.000116
       updateTextInput(session, "min", value = as.character(result[1]))
@@ -314,6 +313,7 @@ output$slope_saturation_eqs <- renderUI({
       
     }
     else{
+      req(!is.null(input$mean_temperature))
       T <- as.numeric(input$mean_temperature)
       result <- 0.200 * (0.00738 * T + 0.8072)^7 - 0.000116
       updateTextInput(session, "slope_saturation", value = as.character(result))
@@ -322,7 +322,98 @@ output$slope_saturation_eqs <- renderUI({
     removeModal()
   })
   
-  observeEvent(input$psy_constant_box, {
+  
+  observeEvent(input$psy_constant_input_box, {
+    label_html <- paste0(
+      katex_html("H", displayMode = FALSE),
+      sprintf('<i class="fa-regular fa-circle-question info" style="margin-left: 5px;" data-toggle="tooltip" data-placement="right" title="%s"></i>', "Elevation above sea level")
+    )
+    showModal(
+      modalDialog(
+        title = "Calculate",
+        uiOutput("atmospheric_pressure_eqs"),
+        div(
+          style = "display: flex; align-items: center; justify-content: center;",
+          div(HTML(label_html), style = "margin-right: 15px;"),
+          textInput("elevation_sea_level",
+                    label = "",
+                    value = "",
+                    width = "20%"
+          )
+        ),
+        uiOutput("psy_constant_eqs"),
+        footer = tagList(
+          actionButton(inputId = "calculate_psy_constant", label = "Submit", class = "submit-btn")
+        )
+      )
+    )
+  })
+  
+  output$psy_constant_eqs <- renderUI({
+    return(
+      div(
+        p(
+          "Using P, λ and cp, the specific heat of water at constant pressure (0.001013 kJ/kg/°C), the psychrometric constant (in
+          kPa/°C) can be calculated using:"
+        ),
+        HTML(katex_html(
+          "\\gamma = \\frac{c_pP}{0.622\\lambda}",
+          displayMode = TRUE, 
+          preview = FALSE,
+          include_css = TRUE,
+          output = "html"
+        )
+        )
+      )
+      
+    )
+    
+  })
+  
+  observeEvent(input$calculate_psy_constant, {
+    if (input$plot_type == "psy_constant"){
+      
+    }
+    else{
+      req(!is.null(input$elevation_sea_level) && !is.null(input$avg_temperature))
+      H <- as.numeric(input$elevation_sea_level)
+      atmospheric_pressure <- 101.3 - 0.01055 * H
+      cp = 0.001013
+      result <- (cp * atmospheric_pressure) / (0.622) * 2
+      updateTextInput(session, "psy_constant", value = as.character(result))
+    }
+    removeModal()
+  })
+  
+  
+  output$atmospheric_pressure_eqs <- renderUI({
+    return(
+      div(
+        p(
+          "To calculate the psychrometric constant, we must first calculate P, the atmospheric pressure that Doorenbos and
+          Pruitt (1977) suggested could be calculated using:"
+        ),
+        HTML(katex_html(
+          "P = 101.3−0.01055H",
+          displayMode = TRUE, 
+          preview = FALSE,
+          include_css = TRUE,
+          output = "html"
+        )
+        ),
+        p(
+          "where P is in kilopascals and H is the elevation above sea level in meters."
+        )
+      )
+      
+    )
+    
+  })
+  
+  
+
+  
+  observeEvent(input$vapor_pressure_deficit_input_box, {
     showModal(
       modalDialog(
         title = "Calculate",
@@ -334,17 +425,6 @@ output$slope_saturation_eqs <- renderUI({
   })
   
   observeEvent(input$ground_heat_flux_input_box, {
-    showModal(
-      modalDialog(
-        title = "Calculate",
-        footer = tagList(
-          actionButton(inputId = "close", label = "Close", class = "submit-btn")
-        )
-      )
-    )
-  })
-  
-  observeEvent(input$vapor_pressure_deficit_input_box, {
     showModal(
       modalDialog(
         title = "Calculate",
