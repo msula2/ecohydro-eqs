@@ -11,7 +11,7 @@ server <- function(input, output, session) {
   )
   
   observe({
-    v$enable_submit = TRUE
+    v$enable_submit <- TRUE
     if (!is.null(v$vars_axis)){
       for (val in names(v$vars_def)){
         if (!is.null(input$plot_type) && val != input$plot_type){
@@ -21,11 +21,11 @@ server <- function(input, output, session) {
               num <- as.numeric(value_entered)
               if (is.na(num)) {
                 showNotification(paste("Error:", "Only numbers are allowed"), type = "error")
-                v$enable_submit = FALSE
+                v$enable_submit <- FALSE
               }   
             }
             else{
-              v$enable_submit = FALSE
+              v$enable_submit <- FALSE
             }
             
           }   
@@ -34,7 +34,7 @@ server <- function(input, output, session) {
       }
     }
     if (is.null(input$min) && is.null(input$min)){
-      v$enable_submit = FALSE
+      v$enable_submit <- FALSE
     }
     else{
         if (input$max != "" && input$min != ""){
@@ -42,13 +42,13 @@ server <- function(input, output, session) {
           num_min <- as.numeric(input$min)
           if (!is.na(num_max) && !is.na(num_min)){
             if (input$max <= input$min){
-              v$enable_submit = FALSE 
+              v$enable_submit <- FALSE 
               showNotification(paste("Error:", "Maximum value must be greater than minimum value"), type = "error")
              
             }  
           }
           else{
-            v$enable_submit = FALSE 
+            v$enable_submit <- FALSE 
             showNotification(paste("Error:", "Only numbers are allowed"), type = "error")
             
           }
@@ -56,7 +56,7 @@ server <- function(input, output, session) {
            
         }
         else{
-          v$enable_submit = FALSE 
+          v$enable_submit <- FALSE 
         }
         
     }
@@ -102,6 +102,68 @@ server <- function(input, output, session) {
     )
   })
   
+  output$set_temperatures <- renderUI({
+    box(
+      width = 12,
+      class = "custom-box",
+      title = "Set Temperatures",
+      tags$table( 
+       tags$thead(
+         tags$tr(
+          tags$th(
+            style = "text-align: center;"
+          ),
+          tags$th(
+            HTML(katex_html("i-1", displayMode = FALSE)),
+            style = "text-align: center;"
+            
+          ),
+          tags$th(
+            HTML(katex_html("i", displayMode = FALSE)),
+            style = "text-align: center;"
+          ),
+          tags$th(
+            HTML(katex_html("i+1", displayMode = FALSE)),
+            style = "text-align: center;"
+          )
+         )
+       ), 
+       tags$tbody(
+         tags$tr(
+           tags$td(align="center", HTML(katex_html("T_{max}", displayMode = FALSE))),
+           tags$td(align="center", textInput("t_max_prev", label = "", value = "", width = "60%")),
+           tags$td(align="center", textInput("t_max", label = "", value = "", width = "60%")),
+           tags$td(align="center", textInput("t_max_aft", label = "", value = "", width = "60%"))
+           
+         ),
+         tags$tr(
+           tags$td(align="center", HTML(katex_html("T_{min}", displayMode = FALSE))),
+           tags$td(align="center", textInput("t_min_prev", label = "", value = "", width = "60%")),
+           tags$td(align="center", textInput("t_min", label = "", value = "", width = "60%")),
+           tags$td(align="center", textInput("t_min_aft", label = "", value = "", width = "60%"))
+         )
+       )
+    ),
+    fluidRow(
+      actionButton(
+        inputId = "submit_temperatures",
+        label = HTML("Submit <i class='fas fa-check' style='margin-left: 2px'></i>"),
+        class = "submit-btn"
+      )  
+    )
+      
+      
+    )
+  })
+  
+  observeEvent(input$submit_temperatures,{
+    t_max <- as.numeric(input$t_max)
+    t_min <- as.numeric(input$t_min)
+    t_avg <- (t_max + t_min) / 2
+    slope_saturation <- 0.200 * (0.00738 * t_avg + 0.8072)^7 - 0.000116
+    updateTextInput(session, "net_radiation", value = as.character(slope_saturation))
+    
+  })
   output$plot_by <- renderUI({
     fluidRow(
       column(6,
@@ -159,6 +221,7 @@ server <- function(input, output, session) {
       def <- v$vars_def[[input$plot_type]]
       mapping <- setNames(names(v$vars_plot), v$vars_plot)
       x_value <- mapping[input$plot_type]
+      value_min <- ""
       if (!is.null(x_value)){
         label_html <- paste0(
           katex_html(x_value, displayMode = FALSE),
@@ -166,7 +229,7 @@ server <- function(input, output, session) {
         )
         div(
           style = "display: flex; align-items: center; justify-content: center;",
-          textInput("min", label = "", value = "", width = "10%"),
+          textInput("min", label = "", value = value_min, width = "10%"),
           div(HTML(katex_html("\\leq", displayMode = FALSE)),  style = "margin-left: 15px;"),
           div(HTML(label_html), style = "margin-left: 15px;"),
           div(HTML(katex_html("\\leq", displayMode = FALSE)),  style = "margin-left: 15px; margin-right: 15px;"),
@@ -324,9 +387,13 @@ output$slope_saturation_eqs <- renderUI({
   
   
   observeEvent(input$psy_constant_input_box, {
-    label_html <- paste0(
+    label_html_elv <- paste0(
       katex_html("H", displayMode = FALSE),
       sprintf('<i class="fa-regular fa-circle-question info" style="margin-left: 5px;" data-toggle="tooltip" data-placement="right" title="%s"></i>', "Elevation above sea level")
+    )
+    label_html_tmp <- paste0(
+      katex_html("T", displayMode = FALSE),
+      sprintf('<i class="fa-regular fa-circle-question info" style="margin-left: 5px;" data-toggle="tooltip" data-placement="right" title="%s"></i>', "Mean Temperature")
     )
     showModal(
       modalDialog(
@@ -334,8 +401,18 @@ output$slope_saturation_eqs <- renderUI({
         uiOutput("atmospheric_pressure_eqs"),
         div(
           style = "display: flex; align-items: center; justify-content: center;",
-          div(HTML(label_html), style = "margin-right: 15px;"),
+          div(HTML(label_html_elv), style = "margin-right: 15px;"),
           textInput("elevation_sea_level",
+                    label = "",
+                    value = "",
+                    width = "20%"
+          )
+        ),
+        uiOutput("latent_heat_eqs"),
+        div(
+          style = "display: flex; align-items: center; justify-content: center;",
+          div(HTML(label_html_tmp), style = "margin-right: 15px;"),
+          textInput("mean_temperature",
                     label = "",
                     value = "",
                     width = "20%"
@@ -347,6 +424,53 @@ output$slope_saturation_eqs <- renderUI({
         )
       )
     )
+  })
+  
+  output$atmospheric_pressure_eqs <- renderUI({
+    return(
+      div(
+        p(
+          "To calculate the psychrometric constant, we must first calculate P, the atmospheric pressure that Doorenbos and
+          Pruitt (1977) suggested could be calculated using:"
+        ),
+        HTML(katex_html(
+          "P = 101.3−0.01055H",
+          displayMode = TRUE, 
+          preview = FALSE,
+          include_css = TRUE,
+          output = "html"
+        )
+        ),
+        p(
+          "where P is in kilopascals and H is the elevation above sea level in meters."
+        )
+      )
+      
+    )
+    
+  })
+  
+  output$latent_heat_eqs <- renderUI({
+    return(
+      div(
+        p(
+          "We must then calculate λ using the equation suggested by Harrison (1963):"
+        ),
+        HTML(katex_html(
+          "\\lambda = 2.501 − 2.361 × 10^{-3}T",
+          displayMode = TRUE, 
+          preview = FALSE,
+          include_css = TRUE,
+          output = "html"
+        )
+        ),
+        p(
+          "where λ is the latent heat of vaporization (MJ/kg) and T is the temperature (°C)"
+        )
+      )
+      
+    )
+    
   })
   
   output$psy_constant_eqs <- renderUI({
@@ -375,43 +499,17 @@ output$slope_saturation_eqs <- renderUI({
       
     }
     else{
-      req(!is.null(input$elevation_sea_level) && !is.null(input$avg_temperature))
+      req(!is.null(input$elevation_sea_level) && !is.null(input$mean_temperature))
       H <- as.numeric(input$elevation_sea_level)
+      T <- as.numeric(input$mean_temperature)
+      lambda <- 2.501 - 2.361 * (10)^-3 * T
       atmospheric_pressure <- 101.3 - 0.01055 * H
       cp = 0.001013
-      result <- (cp * atmospheric_pressure) / (0.622) * 2
+      result <- (cp * atmospheric_pressure) / (0.622) * T
       updateTextInput(session, "psy_constant", value = as.character(result))
     }
     removeModal()
   })
-  
-  
-  output$atmospheric_pressure_eqs <- renderUI({
-    return(
-      div(
-        p(
-          "To calculate the psychrometric constant, we must first calculate P, the atmospheric pressure that Doorenbos and
-          Pruitt (1977) suggested could be calculated using:"
-        ),
-        HTML(katex_html(
-          "P = 101.3−0.01055H",
-          displayMode = TRUE, 
-          preview = FALSE,
-          include_css = TRUE,
-          output = "html"
-        )
-        ),
-        p(
-          "where P is in kilopascals and H is the elevation above sea level in meters."
-        )
-      )
-      
-    )
-    
-  })
-  
-  
-
   
   observeEvent(input$vapor_pressure_deficit_input_box, {
     showModal(

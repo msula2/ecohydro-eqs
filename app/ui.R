@@ -10,6 +10,7 @@ library(dplyr)
 library(kableExtra)
 library(knitr)
 library(shinyjs)
+library(DT)
 # Define UI for application
 ui <- navbarPage(
   "Evapotranspiration",
@@ -41,6 +42,7 @@ ui <- navbarPage(
       useShinyjs(),
       column(
         width = 7,
+        uiOutput("set_temperatures"),
         uiOutput("plot_box"),
         uiOutput("set_arguments")
       ),
