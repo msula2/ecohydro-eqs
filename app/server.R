@@ -125,6 +125,76 @@ server <- function(input, output, session) {
       
     })
     
+    output$set_temperatures <- renderUI({
+      box(
+        width = 12,
+        class = "custom-box",
+        title = "Set Temperatures",
+        tags$table( 
+          tags$thead(
+            tags$tr(
+              tags$th(
+                style = "text-align: center;"
+              ),
+              tags$th(
+                HTML(katex_html("i-1", displayMode = FALSE)),
+                style = "text-align: center;"
+                
+              ),
+              tags$th(
+                HTML(katex_html("i", displayMode = FALSE)),
+                style = "text-align: center;"
+              ),
+              tags$th(
+                HTML(katex_html("i+1", displayMode = FALSE)),
+                style = "text-align: center;"
+              )
+            )
+          ), 
+          tags$tbody(
+            tags$tr(
+              tags$td(align="center", HTML(katex_html("T_{max}", displayMode = FALSE))),
+              tags$td(align="center", textInput("t_max_prev", label = "", value = "", width = "60%")),
+              tags$td(align="center", textInput("t_max", label = "", value = "", width = "60%")),
+              tags$td(align="center", textInput("t_max_aft", label = "", value = "", width = "60%"))
+              
+            ),
+            tags$tr(
+              tags$td(align="center", HTML(katex_html("T_{min}", displayMode = FALSE))),
+              tags$td(align="center", textInput("t_min_prev", label = "", value = "", width = "60%")),
+              tags$td(align="center", textInput("t_min", label = "", value = "", width = "60%")),
+              tags$td(align="center", textInput("t_min_aft", label = "", value = "", width = "60%"))
+            )
+          )
+        ),
+        fluidRow(
+          actionButton(
+            inputId = "submit_temperatures",
+            label = HTML("Submit <i class='fas fa-check' style='margin-left: 2px'></i>"),
+            class = "submit-btn"
+          )  
+        )
+        
+        
+      )
+    })
+    
+    observeEvent(input$submit_temperatures,{
+      t_max <- as.numeric(input$t_max)
+      t_min <- as.numeric(input$t_min)
+      t_avg <- (t_max + t_min) / 2
+      
+      v[["slope_saturation"]] <- 0.200 * (0.00738 * t_avg + 0.8072)^7 - 0.000116
+      if (input$plot_type != "slope_saturation"){
+        updateTextInput(session, "slope_saturation", value = as.character(v$slope_saturation))
+      }
+      else{
+        updateTextInput(session, "min", value = as.character(v$slope_saturation))
+      }
+      
+      
+    })
+    
     output$set_arguments <- renderUI({
       box(
         width = 12,
