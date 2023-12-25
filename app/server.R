@@ -183,6 +183,53 @@ server <- function(input, output, session) {
     
   })
   
+  observeEvent(input$latent_heat_eqs, {
+    mean_temperature <- as.character(input$t)
+    lambda <- as.character(v$latent_heat)
+    
+    
+    showModal(
+      modalDialog(
+        title = "Calculation",
+        div(
+          p(
+            HTML(paste(
+              "The latent heat of vaporization (MJ/kg), ",
+              katex_html("\\lambda", displayMode = FALSE),
+              "can be computed if the mean temperature is known using: "
+            ))
+          ),
+          HTML(katex_html(
+            "\\lambda = 2.501 - 2.361 × 10^{-3}T",
+            displayMode = TRUE, 
+            preview = FALSE,
+            include_css = TRUE,
+            output = "html"
+          )
+          ),
+          p(
+            HTML(paste(
+              "where ",
+              katex_html("\\lambda", displayMode = FALSE),
+              " is in megajoules per kilogram and ",
+              katex_html("T", displayMode = FALSE),
+              " is the mean temperature in degree Celsius."
+            ))
+          ),
+          p("Given that: "),
+          
+        ),
+        div(
+          HTML(katex_html(paste("T", " = ", mean_temperature, "°C", sep = "~"), displayMode = TRUE)),
+          HTML(katex_html(paste0("\\lambda", " = ", lambda, "~MJ/kg", sep = "~"), displayMode = TRUE))
+        ),
+        footer = tagList(
+          actionButton(inputId = "close", label = "Close", class = "submit-btn")
+        )
+      )
+    )
+  })
+  
   observeEvent(input$slope_saturation_eqs, {
     mean_temperature <- as.character(input$t)
     slope_saturation <- as.character(v$slope_saturation)
@@ -192,8 +239,11 @@ server <- function(input, output, session) {
         title = "Calculation",
         div(
           p(
-            "The slope of the saturation vapor pressure–temperature curve Δ can be computed if the mean temperature is
-         known using: "
+            HTML(paste(
+              "The slope of the saturation vapor pressure–temperature curve ",
+              katex_html("\\Delta", displayMode = FALSE),
+              " can be computed if the mean temperature is known using: "
+            ))
           ),
           HTML(katex_html(
             "\\Delta = 0.200[0.00738 T + 0.8072]^{7} - 0.000116",
@@ -204,7 +254,13 @@ server <- function(input, output, session) {
           )
           ),
           p(
-            "where Δ is in kilopascals per degree Celsius and T is the mean temperature in degree Celsius."
+            HTML(paste(
+              "where ",
+              katex_html("\\Delta", displayMode = FALSE),
+              " is in kilopascals per degree Celsius and ",
+              katex_html("T", displayMode = FALSE),
+              " is the mean temperature in degree Celsius."
+            ))
           ),
           p(
             "Given that: "
@@ -266,7 +322,13 @@ server <- function(input, output, session) {
           HTML(katex_html(paste0("P", " = ", P, "~kPa", sep = "~"), displayMode = TRUE))
         ),
         div(
-          p("Next, we need to determine delta, the latent heat of vaporization (MJ/kg) using the following equation: "),
+          p(
+            HTML(paste(
+              "Next, we need to determine ",
+              katex_html("\\lambda", displayMode = FALSE),
+              " , the latent heat of vaporization (MJ/kg) using the following equation: "
+            ))
+          ),
           HTML(katex_html(
             "\\lambda = 2.501 - 2.361 × 10^{-3}T",
             displayMode = TRUE, 
@@ -387,7 +449,7 @@ server <- function(input, output, session) {
           katex_html(x_value, displayMode = FALSE),
           sprintf('<i class="fa-regular fa-circle-question info" style="margin-left: 5px;" data-toggle="tooltip" data-placement="right" title="%s"></i>', def)
         )
-        if (input$plot_type == "slope_saturation" || input$plot_type == "psy_constant" || input$plot_type == "ground_heat_flux"){
+        if (input$plot_type == "slope_saturation" || input$plot_type == "psy_constant" || input$plot_type == "ground_heat_flux" || input$plot_type == "latent_heat"){
           min_box <- textInput("min", label = "", value = v[[input$plot_type]], width = "10%")
           
         }
@@ -416,7 +478,7 @@ server <- function(input, output, session) {
             katex_html(mapping[var_id], displayMode = FALSE),
             sprintf('<i class="fa-regular fa-circle-question info" style="margin-left: 5px;" data-toggle="tooltip" data-placement="right" title="%s"></i>', def)
           )
-          if (var_id == "slope_saturation" || var_id == "psy_constant" || var_id == "ground_heat_flux"){
+          if (var_id == "slope_saturation" || var_id == "psy_constant" || var_id == "ground_heat_flux" || var_id == "latent_heat"){
             return(
               column(
                 width = 4,
@@ -515,6 +577,10 @@ server <- function(input, output, session) {
     
     
     output$plot_box <- renderUI({
+      t_aft <- as.character(input$t_aft)
+      t_prev <- as.character(input$t_prev)
+      t <- as.character(input$t)
+      H <- as.character(input$H)
       box(
         width = 12, title = "Results", class = "custom-box",
         actionButton(inputId = "reset", label = "Reset", class = "reset-btn"),
@@ -529,6 +595,23 @@ server <- function(input, output, session) {
           tabPanel(
             title = "Summary",
             tags$div(
+              div(
+                style = "margin: auto; width: 70%;",
+                p(
+                  "Given that: " 
+                ),
+                p(
+                  HTML(paste(
+                    HTML(katex_html(paste("~T", " = ", t, "~°C~", sep = "~"), displayMode = FALSE)),
+                    " , ",
+                    HTML(katex_html(paste("T~_{i+1}", " = ", t_aft, "~°C~", sep = "~"), displayMode = FALSE)), 
+                    " , ",
+                    HTML(katex_html(paste("~T_{i-1}", " = ", t_prev, "~°C~", sep = "~"), displayMode = FALSE)),
+                    " and ",
+                    HTML(katex_html(paste("~H", " = ", H, "~m~", sep = "~"), displayMode = FALSE))
+                  ))
+                ),
+              ),
               uiOutput("args_table"),
               style = "overflow-x: auto; overflow-y: auto; width: 100%; background-color: white !important; padding: 15px;"
             )
@@ -538,6 +621,7 @@ server <- function(input, output, session) {
       
       
     })
+    
     
     output$args_table <- renderUI(
       {
