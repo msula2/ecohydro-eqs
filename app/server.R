@@ -144,8 +144,8 @@ server <- function(input, output, session) {
     v[["slope_saturation"]] <- 0.200 * (0.00738 * t + 0.8072)^7 - 0.000116
     v[["ground_heat_flux"]] <- 4.2 * ((t_aft - t_prev) / 2)
     v[["latent_heat"]] <- 2.501 - 2.361 * (10^(-3)) * t
-    atmospheric_pressure <- 101.3 - (0.01055 * H)
-    v[["psy_constant"]] <- (0.001013 * atmospheric_pressure) / (0.622 * v[["latent_heat"]])
+    v[["atmospheric_pressure"]] <- 101.3 - (0.01055 * H)
+    v[["psy_constant"]] <- (0.001013 * v[["atmospheric_pressure"]]) / (0.622 * v[["latent_heat"]])
     
     
   })
@@ -185,13 +185,8 @@ server <- function(input, output, session) {
   
   observeEvent(input$slope_saturation_eqs, {
     mean_temperature <- as.character(input$t)
-    slope_saturation <- as.character(input$slope_saturation)
-    label_html <- paste0(
-      katex_html("T", displayMode = FALSE),
-      katex_html(" = ", displayMode = FALSE),
-      katex_html(paste0(mean_temperature, " °C"), displayMode = FALSE)
-    )
-    
+    slope_saturation <- as.character(v$slope_saturation)
+
     showModal(
       modalDialog(
         title = "Calculation",
@@ -225,7 +220,92 @@ server <- function(input, output, session) {
       )
     )
   })
-  
+  observeEvent(input$psy_constant_eqs, {
+    H <- as.character(input$H)
+    P <- as.character(v$atmospheric_pressure)
+    mean_temperature <- as.character(input$t)
+    lambda <- as.character(v$latent_heat)
+    gamma <- as.character(v$psy_constant)
+    
+    
+    
+    showModal(
+      modalDialog(
+        title = "Calculation",
+        div(
+          p(
+            HTML(paste(
+              "To calculate the psychrometric constant, we must first calculate ",
+              katex_html("P", displayMode = FALSE),
+              ", the atmospheric pressure that Doorenbos and Pruitt (1977) suggested could be calculated using:"
+            ))
+          ),
+          HTML(katex_html(
+            "P = 101.3−0.01055H",
+            displayMode = TRUE, 
+            preview = FALSE,
+            include_css = TRUE,
+            output = "html"
+          )
+          ),
+          p(
+            HTML(paste(
+              "where ",
+              katex_html("P", displayMode = FALSE),
+              " is in kilopascals and ",
+              katex_html("H", displayMode = FALSE),
+              " is the elevation above sea level in meters."
+            ))
+          ),
+          p(
+            "Given that: "
+          )
+        ),
+        div(
+          HTML(katex_html(paste("H", " = ", H, "m", sep = "~"), displayMode = TRUE)),
+          HTML(katex_html(paste0("P", " = ", P, "~kPa", sep = "~"), displayMode = TRUE))
+        ),
+        div(
+          p("Next, we need to determine delta, the latent heat of vaporization (MJ/kg) using the following equation: "),
+          HTML(katex_html(
+            "\\lambda = 2.501 - 2.361 × 10^{-3}T",
+            displayMode = TRUE, 
+            preview = FALSE,
+            include_css = TRUE,
+            output = "html"
+          )
+          ),
+          p("Given that: "),
+          
+        ),
+        div(
+          HTML(katex_html(paste("T", " = ", mean_temperature, "°C", sep = "~"), displayMode = TRUE)),
+          HTML(katex_html(paste0("\\lambda", " = ", lambda, "~MJ/kg", sep = "~"), displayMode = TRUE))
+        ),
+        div(
+          p(
+            HTML(paste(
+              "Using ",
+              katex_html(paste("P", "\\lambda", "c_{p}", sep = ","), displayMode = FALSE),
+              " the specific heat of water at constant pressure (0.001013 kJ/kg/°C),",
+              " the psychrometric constant (in kPa/°C) can be calculated using:"
+            ))
+          ),
+          HTML(katex_html(
+            paste("\\gamma = \\frac{c_pP}{0.622\\lambda} = ", gamma , "~kPa/°C"),
+            displayMode = TRUE, 
+            preview = FALSE,
+            include_css = TRUE,
+            output = "html"
+          )
+          )
+        ),
+        footer = tagList(
+          actionButton(inputId = "close", label = "Close", class = "submit-btn")
+        )
+      )
+    )
+  })
   observeEvent(input$plot_type,{
     
     output$definition <- renderUI({
