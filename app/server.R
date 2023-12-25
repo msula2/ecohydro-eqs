@@ -306,6 +306,66 @@ server <- function(input, output, session) {
       )
     )
   })
+  
+  
+  observeEvent(input$ground_heat_flux_eqs, {
+    t_aft <- as.character(input$t_aft)
+    t_prev <- as.character(input$t_prev)
+    G <- as.character(v$ground_heat_flux)
+    
+    showModal(
+      modalDialog(
+        title = "Calculation",
+        div(
+          p(
+            HTML(paste(
+              "The heat flux density to the ground, ",
+              katex_html("G", displayMode = FALSE),
+              " in (MJ/m/d) can be computed when the mean air temperature for the time period before and after the period of interest is known:"
+            ))
+          ),
+          HTML(katex_html(
+            "G = 4.2\\frac{T_{i+1} - T_{i-1}}{\\Delta t}",
+            displayMode = TRUE, 
+            preview = FALSE,
+            include_css = TRUE,
+            output = "html"
+          )
+          ),
+          p(
+            HTML(paste(
+              "where ",
+              katex_html("T", displayMode = FALSE),
+              " is the mean air temperature in ",
+              katex_html("°C", displayMode = FALSE), 
+              "for time period ",
+              katex_html("i + 1", displayMode = FALSE),
+              " and ",
+              katex_html("i - 1", displayMode = FALSE), 
+              " and ",
+              katex_html("\\Delta t", displayMode = FALSE),
+              " is the time in days between the mid-points of the two time periods."
+            ))
+          ),
+          p(
+            "Given that: "
+          )
+        ),
+        div(
+          HTML(katex_html(paste("T_{i+1}", " = ", t_aft, "~°C", sep = "~"), displayMode = TRUE)),
+          HTML(katex_html(paste0("T_{i-1}", " = ", t_prev, "~°C", sep = "~"), displayMode = TRUE)),
+          HTML(katex_html(paste0("\\Delta t", " = ", "2", sep = "~"), displayMode = TRUE)),
+          HTML(katex_html(paste0("G", " = ", G, "~MJ/m/d", sep = "~"), displayMode = TRUE))
+          
+        ),
+        footer = tagList(
+          actionButton(inputId = "close", label = "Close", class = "submit-btn")
+        )
+      )
+    )
+  })
+  
+  
   observeEvent(input$plot_type,{
     
     output$definition <- renderUI({
