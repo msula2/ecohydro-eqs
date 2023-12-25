@@ -41,12 +41,6 @@ ui <- navbarPage(
     fluidPage(
       useShinyjs(),
       column(
-        width = 7,
-        uiOutput("set_temperatures"),
-        uiOutput("plot_box"),
-        uiOutput("set_arguments")
-      ),
-      column(
         width = 5,
         box(
           width = NULL, title = "About", class = "custom-box about",
@@ -64,11 +58,17 @@ ui <- navbarPage(
               output = "html"
             )
             )
-          ),
-          uiOutput("plot_by")
-          
+          )
         )
-      )
+        
+      ),
+      column(
+        width = 7,
+        uiOutput("set_temperatures"),
+        uiOutput("plot_box"),
+        uiOutput("set_arguments")
+      ),
+
     )
   )
 )

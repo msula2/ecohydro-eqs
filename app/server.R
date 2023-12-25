@@ -37,28 +37,28 @@ server <- function(input, output, session) {
       v$enable_submit = FALSE
     }
     else{
-        if (input$max != "" && input$min != ""){
-          num_max <- as.numeric(input$max)
-          num_min <- as.numeric(input$min)
-          if (!is.na(num_max) && !is.na(num_min)){
-            if (input$max <= input$min){
-              v$enable_submit = FALSE 
-              showNotification(paste("Error:", "Maximum value must be greater than minimum value"), type = "error")
-             
-            }  
-          }
-          else{
+      if (input$max != "" && input$min != ""){
+        num_max <- as.numeric(input$max)
+        num_min <- as.numeric(input$min)
+        if (!is.na(num_max) && !is.na(num_min)){
+          if (input$max <= input$min){
             v$enable_submit = FALSE 
-            showNotification(paste("Error:", "Only numbers are allowed"), type = "error")
+            showNotification(paste("Error:", "Maximum value must be greater than minimum value"), type = "error")
             
-          }
-          
-           
+          }  
         }
         else{
           v$enable_submit = FALSE 
+          showNotification(paste("Error:", "Only numbers are allowed"), type = "error")
+          
         }
         
+        
+      }
+      else{
+        v$enable_submit = FALSE 
+      }
+      
     }
     if(v$enable_submit){
       enable("submit")
@@ -80,7 +80,79 @@ server <- function(input, output, session) {
       v$vars_axis <- list("slope_saturation" = "Slope saturation (kPa/°C)","net_radiation" = "Net Radiation (MJ/m²/d )", "ground_heat_flux"="Ground Heat Flux (MJ/m²/d )", "latent_heat"="Latent Heat of Vaporation (MJ/kg)", "psy_constant"="Psychometric Constant (kPa/°C)", "wind_speed"="Wind Speed 2m above ground (m/s)", "vapor_pressure_deficit" = "Vapor Pressure Deficit", "evapo_transpiration" = "Evapotranspiration (mm/day)")
     }
     
+  })
+  
+  output$set_temperatures <- renderUI({
+    box(
+      width = 12,
+      class = "custom-box",
+      title = "Set Altitude & Temperatures",
+      div(
+        style = "display: flex; align-items: center;",
+        div(HTML(katex_html("H", displayMode = FALSE))),
+        div(textInput("H", label = "", value = "", width = "60%"), style="margin-left: 37px;")
+      ),
+      tags$table( 
+        tags$thead(
+          tags$tr(
+            tags$th(
+              style = "text-align: center;"
+            ),
+            tags$th(
+              HTML(katex_html("i-1", displayMode = FALSE)),
+              style = "text-align: center;"
+              
+            ),
+            tags$th(
+              HTML(katex_html("i", displayMode = FALSE)),
+              style = "text-align: center;"
+            ),
+            tags$th(
+              HTML(katex_html("i+1", displayMode = FALSE)),
+              style = "text-align: center;"
+            )
+          )
+        ), 
+        tags$tbody(
+          tags$tr(
+            tags$td(align="center", HTML(katex_html("T", displayMode = FALSE))),
+            tags$td(align="center", textInput("t_prev", label = "", value = "", width = "60%")),
+            tags$td(align="center", textInput("t", label = "", value = "", width = "60%")),
+            tags$td(align="center", textInput("t_aft", label = "", value = "", width = "60%"))
+            
+          )
+        )
+      ),
+      fluidRow(
+        actionButton(
+          inputId = "submit_temperatures",
+          label = HTML("Submit <i class='fas fa-check' style='margin-left: 2px'></i>"),
+          class = "submit-btn"
+        )  
+      )
+      
+      
+    )
+  })
+  
+  observeEvent(input$submit_temperatures,{
+    t_aft <- as.numeric(input$t_aft)
+    t_prev <- as.numeric(input$t_prev)
+    t <- as.numeric(input$t)
+    H <- as.numeric(input$H)
     
+    v[["slope_saturation"]] <- 0.200 * (0.00738 * t + 0.8072)^7 - 0.000116
+    v[["ground_heat_flux"]] <- 4.2 * ((t_aft - t_prev) / 2)
+    v[["latent_heat"]] <- 2.501 - 2.361 * (10^(-3)) * t
+    atmospheric_pressure <- 101.3 - (0.01055 * H)
+    v[["psy_constant"]] <- (0.001013 * atmospheric_pressure) / (0.622 * v[["latent_heat"]])
+    
+    
+  })
+  
+  
+  
+  output$plot_by <- renderUI({
     
     updateSelectizeInput(
       session, "plot_type",
@@ -100,117 +172,68 @@ server <- function(input, output, session) {
         ")
       )
     )
-  })
-  
-  output$plot_by <- renderUI({
+    
     fluidRow(
-      column(6,
-             selectizeInput("plot_type", label = "Plot by:", choices = NULL)
-      ),
-      column(6,
-             uiOutput("definition"),
-             style = "display: flex; align-items: center; height: 85px;"
+      div(
+        selectizeInput("plot_type", label = "Plot by:", choices = NULL, width = "20%"),
+        style = "display: flex; align-items: center; margin-left: 20px;"
       )
+      
     )
     
   })
   
+  observeEvent(input$slope_saturation_eqs, {
+    mean_temperature <- as.character(input$t)
+    slope_saturation <- as.character(input$slope_saturation)
+    label_html <- paste0(
+      katex_html("T", displayMode = FALSE),
+      katex_html(" = ", displayMode = FALSE),
+      katex_html(paste0(mean_temperature, " °C"), displayMode = FALSE)
+    )
+    
+    showModal(
+      modalDialog(
+        title = "Calculation",
+        div(
+          p(
+            "The slope of the saturation vapor pressure–temperature curve Δ can be computed if the mean temperature is
+         known using: "
+          ),
+          HTML(katex_html(
+            "\\Delta = 0.200[0.00738 T + 0.8072]^{7} - 0.000116",
+            displayMode = TRUE, 
+            preview = FALSE,
+            include_css = TRUE,
+            output = "html"
+          )
+          ),
+          p(
+            "where Δ is in kilopascals per degree Celsius and T is the mean temperature in degree Celsius."
+          ),
+          p(
+            "Given that: "
+          )
+        ),
+        div(
+          HTML(katex_html(paste("T", " = ", mean_temperature, "°C", sep = "~"), displayMode = TRUE)),
+          HTML(katex_html(paste0("\\Delta", " = ", slope_saturation, "~kPa/°C", sep = "~"), displayMode = TRUE))
+        ),
+        footer = tagList(
+          actionButton(inputId = "close", label = "Close", class = "submit-btn")
+        )
+      )
+    )
+  })
+  
   observeEvent(input$plot_type,{
+    
     output$definition <- renderUI({
       def <- v$vars_def[[input$plot_type]]
       label_html <- sprintf('<i class="fa-regular fa-circle-question info" data-toggle="tooltip" data-placement="right" title="%s"></i>', def)
       div(
-        HTML(label_html)
-      )
-      
-    })
-    
-    output$set_temperatures <- renderUI({
-      box(
-        width = 12,
-        class = "custom-box",
-        title = "Set Temperatures",
-        tags$table( 
-          tags$thead(
-            tags$tr(
-              tags$th(
-                style = "text-align: center;"
-              ),
-              tags$th(
-                HTML(katex_html("i-1", displayMode = FALSE)),
-                style = "text-align: center;"
-                
-              ),
-              tags$th(
-                HTML(katex_html("i", displayMode = FALSE)),
-                style = "text-align: center;"
-              ),
-              tags$th(
-                HTML(katex_html("i+1", displayMode = FALSE)),
-                style = "text-align: center;"
-              )
-            )
-          ), 
-          tags$tbody(
-            tags$tr(
-              tags$td(align="center", HTML(katex_html("T_{max}", displayMode = FALSE))),
-              tags$td(align="center", textInput("t_max_prev", label = "", value = "", width = "60%")),
-              tags$td(align="center", textInput("t_max", label = "", value = "", width = "60%")),
-              tags$td(align="center", textInput("t_max_aft", label = "", value = "", width = "60%"))
-              
-            ),
-            tags$tr(
-              tags$td(align="center", HTML(katex_html("T_{min}", displayMode = FALSE))),
-              tags$td(align="center", textInput("t_min_prev", label = "", value = "", width = "60%")),
-              tags$td(align="center", textInput("t_min", label = "", value = "", width = "60%")),
-              tags$td(align="center", textInput("t_min_aft", label = "", value = "", width = "60%"))
-            )
-          )
-        ),
-        fluidRow(
-          actionButton(
-            inputId = "submit_temperatures",
-            label = HTML("Submit <i class='fas fa-check' style='margin-left: 2px'></i>"),
-            class = "submit-btn"
-          )  
-        )
-        
-        
-      )
-    })
-    
-    observeEvent(input$submit_temperatures,{
-      t_max <- as.numeric(input$t_max)
-      t_min <- as.numeric(input$t_min)
-      t_avg <- (t_max + t_min) / 2
-      
-      v[["slope_saturation"]] <- 0.200 * (0.00738 * t_avg + 0.8072)^7 - 0.000116
-      if (input$plot_type != "slope_saturation"){
-        updateTextInput(session, "slope_saturation", value = as.character(v$slope_saturation))
-      }
-      else{
-        updateTextInput(session, "min", value = as.character(v$slope_saturation))
-      }
-      
-      
-    })
-    
-    output$set_arguments <- renderUI({
-      box(
-        width = 12,
-        class = "custom-box",
-        title = "Set Arguments",
-        uiOutput("range_x"),
-        uiOutput("default_values"),
-        fluidRow(
-          actionButton(
-            inputId = "submit",
-            label = HTML("Submit <i class='fas fa-check' style='margin-left: 2px'></i>"),
-            class = "submit-btn"
-          )  
-        )
-        
-        
+        HTML(label_html),
+        style = "margin-left: 10px; margin-bottom: 5px;"
       )
       
     })
@@ -224,9 +247,16 @@ server <- function(input, output, session) {
           katex_html(x_value, displayMode = FALSE),
           sprintf('<i class="fa-regular fa-circle-question info" style="margin-left: 5px;" data-toggle="tooltip" data-placement="right" title="%s"></i>', def)
         )
+        if (input$plot_type == "slope_saturation" || input$plot_type == "psy_constant" || input$plot_type == "ground_heat_flux"){
+          min_box <- textInput("min", label = "", value = v[[input$plot_type]], width = "10%")
+          
+        }
+        else{
+          min_box <- textInput("min", label = "", value = "", width = "10%")
+        }
         div(
           style = "display: flex; align-items: center; justify-content: center;",
-          textInput("min", label = "", value = "", width = "10%"),
+          min_box,
           div(HTML(katex_html("\\leq", displayMode = FALSE)),  style = "margin-left: 15px;"),
           div(HTML(label_html), style = "margin-left: 15px;"),
           div(HTML(katex_html("\\leq", displayMode = FALSE)),  style = "margin-left: 15px; margin-right: 15px;"),
@@ -246,16 +276,40 @@ server <- function(input, output, session) {
             katex_html(mapping[var_id], displayMode = FALSE),
             sprintf('<i class="fa-regular fa-circle-question info" style="margin-left: 5px;" data-toggle="tooltip" data-placement="right" title="%s"></i>', def)
           )
-          return(
-            column(
-              width = 4,
-              textInput(var_id,
-                        label = HTML(label_html),
-                        value = "",
-                        width = "80%"
-              )    
+          if (var_id == "slope_saturation" || var_id == "psy_constant" || var_id == "ground_heat_flux"){
+            return(
+              column(
+                width = 4,
+                fluidRow(
+                  column(
+                    width = 10,
+                    textInput(var_id,
+                              label = HTML(label_html),
+                              value = v[[var_id]],
+                              width = "100%"
+                    )
+                  ),
+                  column(
+                    width = 2,
+                    actionButton(inputId = paste0(var_id, "_eqs"), label = HTML("<i class='fa-solid fa-calculator' style = 'color: #2c3e50;'></i>"), style = "background: none; border: none;margin-left: -60px; margin-top: -10px;")
+                  )
+                )
+              )
             )
-          )
+          }
+          else{
+            return(
+              column(
+                width = 4,
+                textInput(var_id,
+                          label = HTML(label_html),
+                          value = "",
+                          width = "80%"
+                )    
+              )
+            )            
+          }
+          
         }
       })
       
@@ -263,6 +317,27 @@ server <- function(input, output, session) {
     })
     
   })
+  output$set_arguments <- renderUI({
+    box(
+      width = 12,
+      class = "custom-box",
+      title = "Set Arguments",
+      uiOutput("plot_by"),
+      uiOutput("range_x"),
+      uiOutput("default_values"),
+      fluidRow(
+        actionButton(
+          inputId = "submit",
+          label = HTML("Submit <i class='fas fa-check' style='margin-left: 2px'></i>"),
+          class = "submit-btn"
+        )  
+      )
+      
+      
+    )
+    
+  })
+  
   
   observeEvent(input$submit, {
     v$data <- NULL
@@ -283,7 +358,7 @@ server <- function(input, output, session) {
     
     if (dependent_var == "evapo_transpiration"){
       y_axis_values <- (v$slope_saturation / (v$slope_saturation + v$psy_constant)) * (v$net_radiation - v$ground_heat_flux) + (((v$psy_constant / (v$slope_saturation + v$psy_constant)) * 6.43 * (1.0 + 0.53 * v$wind_speed) * (v$vapor_pressure_deficit)) / v$latent_heat)
-    
+      
     }
     
     for (j in seq_along(v$vars_eqs)) {
@@ -398,8 +473,12 @@ server <- function(input, output, session) {
     })
     hide("set_arguments")
     show("plot_box")
-
     
+    
+  })
+  
+  observeEvent(input$close,{
+    removeModal()
   })
   
   observeEvent(input$reset,{

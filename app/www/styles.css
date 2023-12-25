@@ -27,7 +27,7 @@
   box-shadow: 3px 3px 3px  rgba(139, 69, 19, 0.5);
   padding: 20px;
 }
-.box-title{
+.box-title, .modal-title{
   font-family: 'Vina Sans', sans-serif;
   color: rgb(111, 78, 55);
   font-weight: 800;
@@ -41,7 +41,7 @@
    box-shadow: 2px 2px 2px #2c3e50;
 
 }
-.submit-btn:hover{
+.submit-btn:hover, .reset-btn:hover{
   background-color: #18bc9c;
 }
 table-bordered>thead>tr>th, .table-bordered>thead>tr>th, table-bordered>tbody>tr>th, .table-bordered>tbody>tr>th, table-bordered>tfoot>tr>th, .table-bordered>tfoot>tr>th, table-bordered>thead>tr>td, .table-bordered>thead>tr>td, table-bordered>tbody>tr>td, .table-bordered>tbody>tr>td, table-bordered>tfoot>tr>td, .table-bordered>tfoot>tr>td {
@@ -59,7 +59,24 @@ table-bordered>thead>tr>th, .table-bordered>thead>tr>th, table-bordered>tbody>tr
 
 }
 
-.reset-btn:hover{
-  background-color: #18bc9c;
+.modal-header{
+  background-color: rgba(139, 69, 19, 0.4);
+  border-bottom: 1px solid  #2c3e50;
 }
-
+.modal-body{
+  background-color: #B9D9EB;
+}
+.modal-footer {
+  padding: 5px;
+  text-align: right;
+  border-top: 1px solid  #2c3e50;
+  background-color: rgba(139, 69, 19, 0.4);
+}
+button .fa-calculator{
+  transition all 1s;
+  
+}
+button .fa-calculator:hover{
+  transform: scale(1.2);
+  
+}
