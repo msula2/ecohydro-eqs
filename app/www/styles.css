@@ -80,3 +80,17 @@ button .fa-calculator:hover{
   transform: scale(1.2);
   
 }
+.fa-sun{
+  color: #FFD700 !important;
+}
+.choices_box{
+   border-radius: 10px; 
+   background-color:  #097969;
+   border: none;
+   box-shadow: 2px 2px 2px #2c3e50;
+   color: white;
+   width: 50%;
+   display: flex; 
+   justify-content: center;
+   margin-top: 10px;
+}

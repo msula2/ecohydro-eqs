@@ -70,5 +70,100 @@ ui <- navbarPage(
       ),
 
     )
+  ),
+  tabPanel(
+    "Vapor Pressure Deficit",
+    icon = icon("sun"),
+    fluidPage(
+      useShinyjs(),
+      column(
+        width = 12,
+        box(
+          width = NULL, title = "About", class = "custom-box about",
+          div(
+            p(
+              "The vapor pressure deficit (Jensen 1990) can be calculated using several methods, here
+              we will explore the method which subtracts the saturation vapor pressure at mean temperature 
+              from saturation vapor pressure at dewpoint temperature. This can be written as:"
+            ),
+            HTML(katex_html(
+              "(e_{s} - e_{d}) = e_{s(T_{avg})} - e_{s(T_{d})}",
+              displayMode = TRUE, 
+              preview = FALSE,
+              include_css = TRUE,
+              output = "html"
+            )
+            ),
+            p(
+              HTML(paste(
+                "To compute saturation vapor pressure ",
+                katex_html("e_{s}", displayMode = FALSE),
+                ", in kilopascal if temperature ",
+                katex_html("T", displayMode = FALSE),
+                " is in degrees Celsius, we can use the following
+                equation which is valid for temperatures ranging 
+                from 0°C to 50°C: "
+              ))
+            ),
+            HTML(katex_html(
+              "e_{s} = exp^{\\frac{16.78T - 116.9}{T + 237.3}}",
+              displayMode = TRUE, 
+              preview = FALSE,
+              include_css = TRUE,
+              output = "html"
+            )
+            ),
+            p(
+              HTML(paste(
+                "Actual vapor pressure,",
+                katex_html("e_{d}", displayMode = FALSE),
+                ", is the vapor pressure of the air. Unlike saturation vapor pressure, 
+                actual vapor pressure cannot be determined simply by knowing the temperature of the air.
+                To determine ",
+                katex_html("e_{d}", displayMode = FALSE),
+                ", we need to know the air temperature and either the relative humidity or the 
+                dewpoint temperature of the air. The following equation can be used to find
+                actual vapor pressure: "
+              ))
+              
+            ),
+            HTML(katex_html(
+              "e_{d} = e_{s}\\frac{RH}{100}",
+              displayMode = TRUE, 
+              preview = FALSE,
+              include_css = TRUE,
+              output = "html"
+            )
+            ),
+            p(
+              HTML(paste(
+              "where ",
+              katex_html("e_{d}", displayMode = FALSE),
+              " is the actual vapor pressure, ",
+              katex_html("e_{s}", displayMode = FALSE),
+              " is the saturation vapor pressure, and ",
+              katex_html("RH", displayMode = FALSE),
+              " is the relative humidity in percentage"
+              ))
+            ),
+            div(
+              style = "display: flex; justify-content: center;",
+              div(
+                class = "choices_box",
+                radioButtons("calc_choice", label = "",
+                             choices = c("Enter arguments", "Enter tabular data"),
+                             selected = NULL, inline = TRUE)
+              )
+            )
+           
+            
+          )
+        )
+        
+      )
+      
+    )
   )
+  
+  
 )
