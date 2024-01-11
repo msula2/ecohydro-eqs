@@ -30,7 +30,6 @@ ui <- navbarPage(
                .fa-calculator, .fa-circle-question {transition all 1s;}
                .fa-calculator:hover, .fa-circle-question:hover{transform: scale(1.2);}
                p {line-height: 1.7;}")
-    
   ),
   collapsible = TRUE,
   inverse = TRUE,
@@ -73,7 +72,7 @@ ui <- navbarPage(
   ),
   tabPanel(
     "Vapor Pressure Deficit",
-    icon = icon("sun"),
+    icon = icon("sun", class="fas"),
     fluidPage(
       useShinyjs(),
       column(
@@ -150,14 +149,17 @@ ui <- navbarPage(
               style = "display: flex; justify-content: center;",
               div(
                 class = "choices_box",
-                radioButtons("calc_choice", label = "",
-                             choices = c("Enter arguments", "Enter tabular data"),
-                             selected = NULL, inline = TRUE)
+                radioButtons("vpd_calc_choice", label = "",
+                             choiceNames = c("Enter arguments", "Enter tabular data"),
+                             choiceValues = c("arguments", "table"),
+                             selected = character(0), inline = TRUE)
               )
+              
             )
            
             
-          )
+          ),
+          uiOutput("vpd_results")
         )
         
       )

@@ -722,4 +722,130 @@ server <- function(input, output, session) {
     }
     show("set_arguments")
   })
+
+  observeEvent(input$vpd_calc_choice,{
+    updateSelectizeInput(
+      session, "ed_arg",
+      choices = list("RH" = "relative_humidity","T_{d}"="temp_dew"),
+      options = list(
+        render = I("
+          {
+            item: function(item, escape) { 
+              var html = katex.renderToString(item.label);
+              return '<div>' + html + '</div>'; 
+            },
+            option: function(item, escape) { 
+              var html = katex.renderToString(item.label);
+              return '<div>' + html + '</div>'; 
+            }
+          }
+        ")
+      )
+    )
+    choice <- input$vpd_calc_choice
+    if (choice == "arguments"){
+      showModal(
+        modalDialog(
+          title = "Calculation",
+          div(
+            style = "display: flex; justify-content: space-around;",
+            div(
+              selectizeInput("ed_arg", label =  HTML(paste("Calculate ", katex_html("e_{d}", displayMode = FALSE), " using:")), choices = NULL, width = "100%")
+            ),
+            uiOutput("ed_args")
+          ),
+          footer = tagList(
+            actionButton(
+              inputId = "submit_vpd_args",
+              label = HTML("Submit <i class='fas fa-check' style='margin-left: 2px'></i>"),
+              class = "submit-btn"
+            )
+          )
+        )
+      )
+    }
+  })
+  
+  output$ed_args <- renderUI({
+    mapping <- list("relative_humidity" = "RH", "temp_dew" = "T_{d}")
+    definitions <- list("relative_humidity" = "Relative humidity in percentage", "temp_dew" = "Dew temperature in degree Celsius")
+    var_id <- input$ed_arg
+    
+    if (var_id %in% names(mapping)) {
+      katex_exp <- mapping[[var_id]]
+      label_html <- paste0(
+        katex_html(katex_exp, displayMode = FALSE),
+        sprintf('<i class="fa-regular fa-circle-question info" style="margin-left: 5px;" data-toggle="tooltip" data-placement="right" title="%s"></i>', definitions[var_id])
+      )
+      t_avg_label <- paste0(
+        katex_html("T_{avg}", displayMode = FALSE),
+        sprintf('<i class="fa-regular fa-circle-question info" style="margin-left: 5px;" data-toggle="tooltip" data-placement="right" title="%s"></i>', "Average temperature in degrees Celcuis")
+      )
+      div(
+        style="display: flex; justify-content: space-around; align-items: center; margin-top: 12px;",
+        textInput("temp_avg",
+                  label = HTML(t_avg_label),
+                  value = "",
+                  width = "20%"
+        ),
+        textInput(var_id,
+                  label = HTML(label_html),
+                  value = "",
+                  width = "20%"
+        )
+      )
+    }
+  })
+  observeEvent(input$submit_vpd_args,{
+    ed_arg <- input$ed_arg
+    T <- as.numeric(input$temp_avg)
+    es <- exp((16.78 * T - 116.9) / (T + 237.3))
+    if(ed_arg == "relative_humidity"){
+      RH <- as.numeric(input$relative_humidity)
+      ed <- es * (RH / 100)
+      
+    }
+    else {
+      td <- as.numeric(input$temp_dew)
+      ed <- exp((16.78 * td - 116.9) / (td + 237.3))
+    }
+    v[["e_d"]] = ed
+    v[["e_s"]] = es
+    
+    removeModal()
+    
+  })
+  output$vpd_results <- renderUI({
+    req(input$ed_arg)
+    arg <- input$ed_arg
+    
+    if(arg == "relative_humidity"){
+      katex_arg <- HTML(katex_html(paste("RH = ", input$relative_humidity, "\\%", sep="~"), displayMode = FALSE))
+    }
+    else{
+      katex_arg <- HTML(katex_html(paste("T_{d} = ", input$temp_dew, "°C", sep="~"), displayMode = FALSE))
+    }
+    div(
+      style="margin-top: 20px;",
+      p(
+        "Given that: "
+      ),
+      p(
+        style = "text-align: center;",
+        HTML(paste(katex_arg, " , " , 
+              HTML(katex_html(paste("e_{s} = ", v$e_s, "kPa~", sep="~"), displayMode = FALSE)),
+              " and ",
+              HTML(katex_html(paste("~e_{d} = ", v$e_d, "kPa~", sep="~"), displayMode = FALSE))
+          ))
+        ),
+      p(
+        HTML(paste(
+          "Hence the vapor pressure deficit is calculated as ",
+          HTML(katex_html(paste("e_{s} - e_{d}", " = ", v$e_s - v$e_d, "~kPa", sep = "~")))
+          ))
+      )
+      )
+  })
+  
 }
+
