@@ -85,14 +85,18 @@ ui <- navbarPage(
               we will explore the method which subtracts the saturation vapor pressure at mean temperature 
               from saturation vapor pressure at dewpoint temperature. This can be written as:"
             ),
-            HTML(katex_html(
-              "(e_{s} - e_{d}) = e_{s(T_{avg})} - e_{s(T_{d})}",
-              displayMode = TRUE, 
-              preview = FALSE,
-              include_css = TRUE,
-              output = "html"
-            )
-            ),
+            div(
+              style = "display: flex; align-items: center; justify-content: center;",
+              HTML(paste0(
+                katex_html(
+                "(e_{s} - e_{d}) = e_{s(T_{avg})} - e_{s(T_{d})}",
+                displayMode = TRUE, 
+                preview = FALSE,
+                include_css = TRUE,
+                output = "html"
+              ),
+              img(src = "img/circle-1.png", alt = "Equation 1", style = "margin-left: 10px;")
+            ))),
             p(
               HTML(paste(
                 "To compute saturation vapor pressure ",
@@ -104,14 +108,18 @@ ui <- navbarPage(
                 from 0°C to 50°C: "
               ))
             ),
-            HTML(katex_html(
-              "e_{s} = exp^{\\frac{16.78T - 116.9}{T + 237.3}}",
-              displayMode = TRUE, 
-              preview = FALSE,
-              include_css = TRUE,
-              output = "html"
-            )
-            ),
+            div(
+              style = "display: flex; align-items: center; justify-content: center;",
+              HTML(paste0(
+                katex_html(
+                  "e_{s} = exp^{\\frac{16.78T - 116.9}{T + 237.3}}",
+                  displayMode = TRUE, 
+                  preview = FALSE,
+                  include_css = TRUE,
+                  output = "html"
+                ),
+                img(src = "img/circle-2.png", alt = "Equation 2", style = "margin-left: 10px;")
+              ))),
             p(
               HTML(paste(
                 "Actual vapor pressure,",
@@ -126,14 +134,18 @@ ui <- navbarPage(
               ))
               
             ),
-            HTML(katex_html(
-              "e_{d} = e_{s}\\frac{RH}{100}",
-              displayMode = TRUE, 
-              preview = FALSE,
-              include_css = TRUE,
-              output = "html"
-            )
-            ),
+            div(
+              style = "display: flex; align-items: center; justify-content: center;",
+              HTML(paste0(
+                katex_html(
+                  "e_{d} = e_{s}\\frac{RH}{100}",
+                  displayMode = TRUE, 
+                  preview = FALSE,
+                  include_css = TRUE,
+                  output = "html"
+                ),
+                img(src = "img/circle-3.png", alt = "Equation 3", style = "margin-left: 10px;")
+              ))),
             p(
               HTML(paste(
               "where ",
