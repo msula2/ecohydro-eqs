@@ -94,3 +94,6 @@ button .fa-calculator:hover{
    justify-content: center;
    margin-top: 10px;
 }
+.fa-water{
+  color: blue !important;
+}
