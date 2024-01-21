@@ -5,6 +5,7 @@ source("server_penman.R")
 source("server_open.R")
 source("server_vapor.R")
 source("server_criddle.R")
+source("server_pan.R")
 
 # Define the main server function
 shinyServer(function(input, output, session) {
@@ -22,6 +23,9 @@ shinyServer(function(input, output, session) {
       vapor_server(input, output, session)
     } else if (current_tab == "Blaney Criddle Method"){
       criddle_server(input, output, session)
+    }
+    else if (current_tab == "Pan Evaporation"){
+      pan_server(input, output, session)
     }
   })
 })

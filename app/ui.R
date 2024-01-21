@@ -16,6 +16,7 @@ source("ui_penman.R")
 source("ui_vapor.R")
 source("ui_open.R")
 source("ui_criddle.R")
+source("ui_pan.R")
 # Define UI for application
 ui <- navbarPage(
   "Evapotranspiration",
@@ -58,6 +59,11 @@ ui <- navbarPage(
     "Blaney Criddle Method",
     icon = icon("seedling", class="fas"),
     ui_criddle
+  ),
+  tabPanel(
+    "Pan Evaporation",
+    icon = icon("drum-steelpan", class="fas"),
+    ui_pan
   )
   
   

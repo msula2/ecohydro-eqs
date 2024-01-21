@@ -5,7 +5,7 @@ account: msula2
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 10608300
-bundleId: 8154030
+bundleId: 8167170
 url: https://msula2.shinyapps.io/ecohydro-eqs/
 version: 1
 asMultiple: FALSE
