@@ -65,6 +65,4 @@ ui <- navbarPage(
     icon = icon("drum-steelpan", class="fas"),
     ui_pan
   )
-  
-  
 )
