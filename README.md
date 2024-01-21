@@ -1,4 +1,5 @@
 # ecohydro-eqs
+### [Click here to visit](https://msula2.shinyapps.io/ecohydro-eqs/)
 A Shiny application to visualize the relationship between variables involved in complex equations used in Ecohydrology. The application covers the following equations:
 - Penman's Method
 - Vapor Pressure Deficit
@@ -6,4 +7,4 @@ A Shiny application to visualize the relationship between variables involved in 
 - Blaney Criddle Method
 - Pan Evaporation
 
-Users can plot the relationship between the dependant variable and any other variable of their choosing which is involved in the equation. The application also informs users of the definitions of the variables involved and their recomended ranges.
+Users can plot the relationship between the dependent variable and any other variable of their choosing which is involved in the equation. The application also informs users of the definitions of the variables involved and their recommended ranges.
