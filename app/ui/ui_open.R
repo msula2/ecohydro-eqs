@@ -1,5 +1,17 @@
 ui_open <- fluidPage(
   useShinyjs(),
+  div(
+    id = "loader_background_op"
+  ),
+  div(
+    id = "loader_op",
+    icon("water", class="fas", style = "font-size: 125px;"),
+    p(
+      "Loading . . .",
+      style = "padding-top: 5px;"
+    )
+    
+  ),
   column(
     width = 5,
     box(

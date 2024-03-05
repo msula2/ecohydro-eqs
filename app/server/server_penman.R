@@ -81,6 +81,11 @@ penman_server <- function(input, output, session) {
   
   observeEvent(input$submit_temperatures,{
     
+    toggle("loader_background_p")
+    toggle("loader_p")
+    delay(3500, hide("loader_background_p"))
+    delay(3500, hide("loader_p"))
+    
     t_aft <- as.numeric(input$t_aft)
     t_prev <- as.numeric(input$t_prev)
     t <- as.numeric(input$t)
@@ -491,6 +496,12 @@ penman_server <- function(input, output, session) {
   
   
   observeEvent(input$submit, {
+    
+    toggle("loader_background_p")
+    toggle("loader_p")
+    delay(3500, hide("loader_background_p"))
+    delay(3500, hide("loader_p"))
+    
     v$data <- NULL
     x_axis_values <- seq(input$min, input$max, length.out = 10)
     dependent_var <- v$output_var$id

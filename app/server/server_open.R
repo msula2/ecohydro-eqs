@@ -143,6 +143,12 @@ open_server <- function(input, output, session) {
   
   
   observeEvent(input$submit_open, {
+    
+    toggle("loader_background_op")
+    toggle("loader_op")
+    delay(3500, hide("loader_background_op"))
+    delay(3500, hide("loader_op"))
+    
     v$data <- NULL
     x_axis_values <- seq(input$min_open, input$max_open, length.out = 10)
     dependent_var <- v$output_var$id

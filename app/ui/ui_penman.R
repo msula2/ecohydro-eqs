@@ -1,5 +1,17 @@
 ui_penman <-   fluidPage(
   useShinyjs(),
+  div(
+    id = "loader_background_p"
+  ),
+  div(
+    id = "loader_p",
+    icon("droplet", class="fas", style = "font-size: 125px;"),
+    p(
+      "Loading . . .",
+      style = "padding-top: 5px;"
+    )
+    
+  ),
   column(
     width = 5,
     box(

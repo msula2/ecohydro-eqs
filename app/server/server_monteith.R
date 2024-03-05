@@ -122,6 +122,12 @@ monteith_server <- function(input, output, session) {
   })
   
   observeEvent(input$submit_meanmonthly_pm,{
+    
+    toggle("loader_background_pm")
+    toggle("loader_pm")
+    delay(3500, hide("loader_background_pm"))
+    delay(3500, hide("loader_pm"))
+    
     t_mean <- as.numeric(input$t_pm)
     H <- as.numeric(input$H_pm)
     specific_heat <- 1.013 * 10^(-3)
@@ -473,6 +479,12 @@ monteith_server <- function(input, output, session) {
   
   
   observeEvent(input$submit_pm, {
+    
+    toggle("loader_background_pm")
+    toggle("loader_pm")
+    delay(3500, hide("loader_background"))
+    delay(3500, hide("loader_pm"))
+    
     v$data <- NULL
     x_axis_values <- seq(input$min_pm, input$max_pm, length.out = 10)
     dependent_var <- v$output_var$id

@@ -1,5 +1,17 @@
 ui_vapor <- fluidPage(
   useShinyjs(),
+  div(
+    id = "loader_background_vp"
+  ),
+  div(
+    id = "loader_vp",
+    icon("sun", class="fas", style = "font-size: 125px;"),
+    p(
+      "Loading . . .",
+      style = "padding-top: 5px;"
+    )
+    
+  ),
   column(
     width = 12,
     box(

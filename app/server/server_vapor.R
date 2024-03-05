@@ -157,6 +157,12 @@ vapor_server <- function(input, output, session) {
     }
   })
   observeEvent(input$submit_vpd_args,{
+    
+    toggle("loader_background_vp")
+    toggle("loader_vp")
+    delay(3500, hide("loader_background_vp"))
+    delay(3500, hide("loader_vp"))
+    
     ed_arg <- input$ed_arg
     T <- as.numeric(input$t_avg)
     es <- exp((16.78 * T - 116.9) / (T + 237.3))
@@ -244,6 +250,12 @@ vapor_server <- function(input, output, session) {
   
   
   observeEvent(input$submit_vpd_data, {
+    
+    toggle("loader_background_vp")
+    toggle("loader_vp")
+    delay(3500, hide("loader_background_vp"))
+    delay(3500, hide("loader_vp"))
+    
     max_T <- max(as.numeric(v$data_vpd$T))
     print(max_T)
     min_T <- min(as.numeric(v$data_vpd$T))
