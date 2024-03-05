@@ -75,41 +75,6 @@ monteith_server <- function(input, output, session) {
           ),
           tags$tr(
             tags$td(
-              HTML(katex_html("u_2", displayMode = FALSE)),
-              tags$i(class = "fa-regular fa-circle-question info", 
-                     style = "margin-left: 5px; color: #2c3e50;", 
-                     `data-toggle` = "tooltip", 
-                     `data-placement` = "right", 
-                     title = "Monthly average daily wind speed")
-            ),
-            tags$td(
-              textInput("wind_speed_pm", label = "", value = "", width = "60%"),
-              align="center"
-            ),
-            tags$td(
-              HTML(katex_html("m/s", displayMode = FALSE))
-            )
-            
-          ),
-          tags$tr(
-            tags$td(
-              HTML(katex_html("n", displayMode = FALSE)),
-              tags$i(class = "fa-regular fa-circle-question info", 
-                     style = "margin-left: 5px; color: #2c3e50;", 
-                     `data-toggle` = "tooltip", 
-                     `data-placement` = "right", 
-                     title = "Monthly average sunshine duration")
-            ),
-            tags$td(
-              textInput("sunshine_duration", label = "", value = "", width = "60%"),
-              align="center"
-            ),
-            tags$td(
-              HTML(katex_html("hours/day", displayMode = FALSE))
-            )
-          ),
-          tags$tr(
-            tags$td(
               HTML(katex_html("T_i", displayMode = FALSE)),
               tags$i(class = "fa-regular fa-circle-question info", 
                      style = "margin-left: 5px; color: #2c3e50;", 
@@ -169,9 +134,10 @@ monteith_server <- function(input, output, session) {
     v[["slope_saturation_pm"]] <- result <- 4098 * (0.6108 * exp((17.27 * t_mean) / (t_mean + 237.3))) / (t_mean + 237.3)^2
     v[["atmospheric_pressure_pm"]] <- 101.3 * ((293 - 0.0065*H)/(293))^5.26
     v[["psy_constant_pm"]] <- (specific_heat * v[["atmospheric_pressure_pm"]]) / (ratio_molecular_weight * latent_heat)
-    v[["sat_vapour_pressure_pm"]] <- 0.6108 * exp((17.27 * t_mean) / (t_mean + 237.3))
-    v[["vapor_pressure_deficit_pm"]] <- v[["sat_vapour_pressure_pm"]] - daily_vapor_pressure
-      
+    v[["sat_vapor_pressure_pm"]] <- 0.6108 * exp((17.27 * t_mean) / (t_mean + 237.3))
+    v[["vapor_pressure_deficit_pm"]] <- v[["sat_vapor_pressure_pm"]] - daily_vapor_pressure
+    v[["t_pm"]] <- t_mean
+    
     output$set_arguments_pm <- renderUI({
       box(
         width = 12,
@@ -193,7 +159,7 @@ monteith_server <- function(input, output, session) {
       
     })
     
-    hide("set_meanmonthy_data_pm")
+    hide("set_monthly_data_pm")
     
     
   })
@@ -270,6 +236,141 @@ monteith_server <- function(input, output, session) {
         div(
           HTML(katex_html(paste("T", " = ", mean_temperature, "°C", sep = "~"), displayMode = TRUE)),
           HTML(katex_html(paste0("\\Delta", " = ", slope_saturation, "~kPa/°C", sep = "~"), displayMode = TRUE))
+        ),
+        footer = tagList(
+          actionButton(inputId = "close", label = "Close", class = "submit-btn")
+        )
+      )
+    )
+  })
+  
+  observeEvent(input$vapor_pressure_deficit_pm_eqs, {
+    daily_vapor <- as.character(input$daily_vapour_pressure_pm)
+    sat_vapor <- as.character(v$sat_vapor_pressure_pm)
+    mean_temperature <- as.character(input$t_pm)
+    vapor_pressure_def <- as.character(v$vapor_pressure_deficit_pm)
+    
+    
+    showModal(
+      modalDialog(
+        title = "Calculation",
+        div(
+          p(
+            HTML(paste(
+              "To determine the vapor pressure deficit, we must first determine ",
+              katex_html("e_s", displayMode = FALSE),
+              " , the saturation vapor pressure, which can be computed if the mean air temperature is known using: "
+            ))
+          ),
+          HTML(katex_html(
+            "e_s = 0.6108 e^{\\left(\\frac{17.27T}{T + 237.3}\\right)}",
+            displayMode = TRUE, 
+            preview = FALSE,
+            include_css = TRUE,
+            output = "html"
+          )
+          ),
+          p(
+            HTML(paste(
+              "where ",
+              katex_html("e_s", displayMode = FALSE),
+              " is in kilopascals and ",
+              katex_html("T", displayMode = FALSE),
+              " is the mean air temperature in degree Celsius."
+            ))
+          ),
+          p(
+            "Given that: "
+          )
+        ),
+        div(
+          HTML(katex_html(paste("T", " = ", mean_temperature, "°C", sep = "~"), displayMode = TRUE)),
+          HTML(katex_html(paste0("e_s", " = ", sat_vapor, "~kPa", sep = "~"), displayMode = TRUE)),
+          HTML(katex_html(paste0("e_a", " = ", daily_vapor, "~kPa", sep = "~"), displayMode = TRUE))
+        ),
+        p(
+          HTML(paste(
+            "We can determine the vapor pressure deficit, using the following equation: "
+          ))
+        ),
+        HTML(katex_html(
+          paste("e_s - e_a = ", vapor_pressure_def , "~kPa"),
+          displayMode = TRUE, 
+          preview = FALSE,
+          include_css = TRUE,
+          output = "html"
+        )
+        ),
+        footer = tagList(
+          actionButton(inputId = "close", label = "Close", class = "submit-btn")
+        )
+      )
+    )
+  })
+  
+  observeEvent(input$psy_constant_pm_eqs, {
+    H <- as.character(input$H_pm)
+    P <- as.character(v$atmospheric_pressure_pm)
+    gamma <- as.character(v$psy_constant_pm)
+    
+    
+    showModal(
+      modalDialog(
+        title = "Calculation",
+        div(
+          p(
+            HTML(paste(
+              "To calculate the psychrometric constant, we must first calculate ",
+              katex_html("P", displayMode = FALSE),
+              ", the atmospheric pressure using:"
+            ))
+          ),
+          HTML(katex_html(
+            "P = 101.3\\left( \\frac{293 - 0.0065H}{293} \\right)^{5.26}",
+            displayMode = TRUE, 
+            preview = FALSE,
+            include_css = TRUE,
+            output = "html"
+          )
+          ),
+          p(
+            HTML(paste(
+              "where ",
+              katex_html("P", displayMode = FALSE),
+              " is in kilopascals and ",
+              katex_html("H", displayMode = FALSE),
+              " is the elevation above sea level in meters."
+            ))
+          ),
+          p(
+            "Given that: "
+          )
+        ),
+        div(
+          HTML(katex_html(paste("H", " = ", H, "m", sep = "~"), displayMode = TRUE)),
+          HTML(katex_html(paste0("P", " = ", P, "~kPa", sep = "~"), displayMode = TRUE))
+        ),
+        div(
+          p(
+            HTML(paste(
+              "Using ",
+              katex_html(paste("P", "c_{p}", sep = ","), displayMode = FALSE),
+              " the specific heat of water at constant pressure (0.001013 kJ/kg/°C),",
+              katex_html("\\lambda", displayMode = FALSE),
+              " the latent heat of vaporization (2.45 MJ/kg/°C),",
+              katex_html("\\varepsilon", displayMode = FALSE),
+              " ratio molecular weight of water vapour/dry air (0.622),",
+              " the psychrometric constant (in kPa/°C) can be calculated with the equation:"
+            ))
+          ),
+          HTML(katex_html(
+            paste("\\gamma = \\frac{c_pP}{\\varepsilon \\lambda} = ", gamma , "~kPa/°C"),
+            displayMode = TRUE, 
+            preview = FALSE,
+            include_css = TRUE,
+            output = "html"
+          )
+          )
         ),
         footer = tagList(
           actionButton(inputId = "close", label = "Close", class = "submit-btn")
@@ -367,6 +468,163 @@ monteith_server <- function(input, output, session) {
       
       fluidRow(inputs)
     })
+    
+  })
+  
+  
+  observeEvent(input$submit_pm, {
+    v$data <- NULL
+    x_axis_values <- seq(input$min_pm, input$max_pm, length.out = 10)
+    dependent_var <- v$output_var$id
+    
+    default_vars <- setdiff(names(v$vars_def), input$plot_type_pm)
+    for (dv in default_vars){
+      v[[dv]] <- as.numeric(input[[dv]])
+    }
+    independent_var <- input$plot_type_pm
+    
+    v[[independent_var]] <- x_axis_values
+    
+    # Initialize an empty data frame to store the results
+    result_df <- data.frame(matrix(ncol = length(v$vars_eqs), nrow = length(x_axis_values)))
+    colnames(result_df) <- v$vars_eqs
+    
+    y_axis_values <- (0.408 * v$slope_saturation_pm * (v$net_radiation_pm - v$ground_heat_flux_pm) + v$psy_constant_pm * (900 / (v$t_pm + 273)) * v$wind_speed_pm * v$vapor_pressure_deficit_pm) / (v$slope_saturation_pm + v$psy_constant_pm *(1 + 0.34 * v$wind_speed_pm))
+      
+    
+    for (j in seq_along(v$vars_eqs)) {
+      if (v$vars_eqs[j] == input$plot_type_pm) {
+        result_df[, v$vars_eqs[j]] <- x_axis_values
+      } else if (v$vars_eqs[j] == dependent_var) {
+        result_df[, v$vars_eqs[j]] <- y_axis_values
+      } else {
+        result_df[, v$vars_eqs[j]] <- input[[v$vars_eqs[j]]]
+      }
+    }
+    
+    v$data <- result_df
+    
+    
+    output$plot_box_pm <- renderUI({
+      t <- as.character(input$t_pm)
+      H <- as.character(input$H_pm)
+      daily_vapor_pressure <- as.character(input$daily_vapour_pressure_pm)
+      
+      box(
+        width = 12, title = "Results", class = "custom-box",
+        actionButton(inputId = "reset_pm", label = "Reset", class = "reset-btn"),
+        tabBox(
+          width = NULL,
+          id = "results_tab_pm",
+          title = "",
+          tabPanel(
+            title = "Graph",
+            plotlyOutput("plot_relationship_pm")
+          ),
+          tabPanel(
+            title = "Summary",
+            tags$div(
+              div(
+                style = "margin: auto; width: 70%;",
+                p(
+                  "Given that: " 
+                ),
+                p(
+                  HTML(paste(
+                    HTML(katex_html(paste("~T", " = ", t, "~°C~", sep = "~"), displayMode = FALSE)),
+                    " , ",
+                    HTML(katex_html(paste("~e_a", " = ", daily_vapor_pressure, "~kPa~", sep = "~"), displayMode = FALSE)),
+                    " and ",
+                    HTML(katex_html(paste("~H", " = ", H, "~m~", sep = "~"), displayMode = FALSE))
+                  ))
+                ),
+              ),
+              uiOutput("args_table_pm"),
+              style = "overflow-x: auto; overflow-y: auto; width: 100%; background-color: white !important; padding: 15px;"
+            )
+          )
+        )
+      )
+      
+      
+    })
+    
+    
+    output$args_table_pm <- renderUI(
+      {
+        default_table <- v$data %>% 
+          select(all_of(default_vars)) %>% 
+          summarise_all(max)
+        
+        select_vals <- c(independent_var, dependent_var)
+        results_table <- v$data %>% 
+          select(all_of(select_vals)) %>% 
+          summarise_all(~sprintf("%s to %s", round(min(.), digits = 3), round(max(.), digits = 3)))
+        
+        args_table <- bind_cols(default_table, results_table)
+        
+        mapping <- setNames(names(v$vars_plot), v$vars_plot)
+        
+        symbols_latex_col <- lapply(colnames(args_table), function(colname) {
+          symbol <- NULL
+          if (colname != v$output_var$id){
+            symbol <- mapping[colname]
+          }
+          else{
+            symbol <- v$output_var$value
+          }
+          return(HTML(katex_html(symbol, displayMode = FALSE)))
+        })
+        
+        colnames_units <- lapply(colnames(args_table), function(colname) {
+          return(v$vars_axis[[colname]])
+        })
+        
+        colnames(args_table) <- colnames_units
+        
+        args_table <- args_table %>%
+          pivot_longer(cols = everything(), names_to = "Argument", values_to = "Value")
+        
+        
+        
+        args_table <- args_table %>%
+          mutate(Symbol = symbols_latex_col)
+        
+        args_table_df <- as.data.frame(args_table)
+        
+        
+        kable_styled <- kable(args_table_df, format = "html", escape = FALSE) %>%
+          kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive", "bordered"), full_width = FALSE)
+        
+        return(HTML(kable_styled))
+      }
+    )
+    
+    output$plot_relationship_pm <- renderPlotly({
+      if (nrow(v$data)) {
+        x_axis_title <- v$vars_axis[[independent_var]]
+        y_axis_title <- v$vars_axis[[dependent_var]]
+        ggplot(v$data, aes(x = .data[[independent_var]], y = .data[[dependent_var]])) +
+          geom_line(color = "#18bc9c", size = 0.8) +
+          geom_point(color = "#097969", size = 1.6) +
+          scale_x_continuous(name = x_axis_title) +
+          scale_y_continuous(name = y_axis_title) +
+          theme(
+            plot.margin = margin(30, 40, 30, 30, unit = "pt"),
+            text = element_text(family = "Lato"),
+            title = element_text(size = 9),
+            axis.title = element_text(size = 10),
+            axis.text = element_text(size = 9),
+            panel.grid.minor = element_blank(),
+            panel.background = element_rect(fill = "white"),
+            panel.grid.major = element_line(color = "gray", linetype = "dashed"),
+          )+
+          ggtitle(paste("Relationship between", x_axis_title, "and", y_axis_title))
+      }
+    })
+    hide("set_arguments")
+    show("plot_box")
+    
     
   })
 }
