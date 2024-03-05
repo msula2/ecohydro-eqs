@@ -106,3 +106,19 @@ button .fa-calculator:hover{
 .fa-wind{
   color: #d0d0d0  !important;
 }
+.fa-wheat-awn{
+  color: wheat !important;
+}
+ table {
+  border-collapse: collapse;
+  border: 1px solid black;
+  width: 80%;
+  margin: auto;
+}
+th, td {
+  border: 1px solid black !important;
+  padding: 8px;
+}
+th {
+  background-color: #d0b4a0;
+}

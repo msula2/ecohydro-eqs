@@ -17,6 +17,7 @@ source("ui/ui_vapor.R")
 source("ui/ui_open.R")
 source("ui/ui_criddle.R")
 source("ui/ui_pan.R")
+source("ui/ui_monteith.R")
 # Define UI for application
 ui <- navbarPage(
   "Evapotranspiration",
@@ -64,7 +65,13 @@ ui <- navbarPage(
     "Pan Evaporation",
     icon = icon("drum-steelpan", class="fas"),
     ui_pan
+  ),
+  tabPanel(
+    "Penman-Monteith Method",
+    icon = icon("wheat-awn", class="fas"),
+    ui_monteith
   )
+  
 )
 
 # server.R
@@ -75,6 +82,7 @@ source("server/server_open.R")
 source("server/server_vapor.R")
 source("server/server_criddle.R")
 source("server/server_pan.R")
+source("server/server_monteith.R")
 
 # Define the main server function
 server <- function(input, output, session) {
@@ -95,6 +103,9 @@ server <- function(input, output, session) {
     }
     else if (current_tab == "Pan Evaporation"){
       pan_server(input, output, session)
+    }
+    else if(current_tab == "Penman-Monteith Method"){
+      monteith_server(input, output, session)
     }
   })
 }
