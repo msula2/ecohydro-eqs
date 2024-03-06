@@ -1,6 +1,11 @@
 # server_monteith.R
 
 monteith_server <- function(input, output, session) {
+  
+  delay(3500, hide("loader_background_pm"))
+  delay(3500, hide("loader_pm"))
+  
+  
   v <- reactiveValues(
     vars_plot = NULL,
     vars_def = NULL,
@@ -16,6 +21,7 @@ monteith_server <- function(input, output, session) {
     tab <- input$navbar
     vars_eqs <- NULL
     if (tab == "Penman-Monteith Method") {
+      
       v$vars_plot <- list("\\Delta" = "slope_saturation_pm","R_n"="net_radiation_pm", "G"="ground_heat_flux_pm", "\\gamma" = "psy_constant_pm", "u_2" = "wind_speed_pm", "e_s - e_a" = "vapor_pressure_deficit_pm")
       v$vars_def <- list("slope_saturation_pm" = "Slope of the saturation vapor pressure curve with respect to temperature","net_radiation_pm" = "Net Radiation", "ground_heat_flux_pm"="Ground Heat Flux", "psy_constant_pm"="Psychometric Constant", "wind_speed_pm"="Wind Speed 2m above ground", "vapor_pressure_deficit_pm" = "Vapor Pressure Deficit")
       v$output_var <- list(id = "ref_evapo_transpiration", value = "ET_o")  
@@ -482,7 +488,7 @@ monteith_server <- function(input, output, session) {
     
     toggle("loader_background_pm")
     toggle("loader_pm")
-    delay(3500, hide("loader_background"))
+    delay(3500, hide("loader_background_pm"))
     delay(3500, hide("loader_pm"))
     
     v$data <- NULL

@@ -1,7 +1,8 @@
 ui_penman <-   fluidPage(
   useShinyjs(),
   div(
-    id = "loader_background_p"
+    id = "loader_background_p",
+    style="display: block;"
   ),
   div(
     id = "loader_p",
@@ -9,7 +10,8 @@ ui_penman <-   fluidPage(
     p(
       "Loading . . .",
       style = "padding-top: 5px;"
-    )
+    ),
+    style="display: block;"
     
   ),
   column(

@@ -1,6 +1,9 @@
 # server_criddle.R
 criddle_server <- function(input, output, session) {
   
+  delay(3500, hide("loader_background_cr"))
+  delay(3500, hide("loader_cr"))
+  
   v <- reactiveValues(
     data_criddle = data.frame(Month = character(0),
                           T_avg = numeric(0),

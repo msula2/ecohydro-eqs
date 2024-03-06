@@ -1,7 +1,8 @@
 ui_monteith <- fluidPage(
   useShinyjs(),
   div(
-    id = "loader_background_pm"
+    id = "loader_background_pm",
+    style="display: block;"
   ),
   div(
     id = "loader_pm",
@@ -9,7 +10,8 @@ ui_monteith <- fluidPage(
     p(
       "Loading . . .",
       style = "padding-top: 5px;"
-    )
+    ),
+    style="display: block;"
     
   ),
   column(

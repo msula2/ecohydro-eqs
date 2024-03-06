@@ -1,7 +1,8 @@
 ui_criddle <- fluidPage(
   useShinyjs(),
   div(
-    id = "loader_background_cr"
+    id = "loader_background_cr",
+    style="display: block;"
   ),
   div(
     id = "loader_cr",
@@ -9,8 +10,8 @@ ui_criddle <- fluidPage(
     p(
       "Loading . . .",
       style = "padding-top: 5px;"
-    )
-    
+    ),
+    style="display: block;"
   ),
   column(
     width = 12,

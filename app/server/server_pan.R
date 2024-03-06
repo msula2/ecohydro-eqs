@@ -1,6 +1,9 @@
 # server_pan.R
 pan_server <- function(input, output, session) {
   
+  delay(3500, hide("loader_background_pn"))
+  delay(3500, hide("loader_pn"))
+  
   v <- reactiveValues(
     vars_plot = NULL,
     vars_def = NULL,

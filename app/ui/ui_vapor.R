@@ -1,7 +1,8 @@
 ui_vapor <- fluidPage(
   useShinyjs(),
   div(
-    id = "loader_background_vp"
+    id = "loader_background_vp",
+    style="display: block;"
   ),
   div(
     id = "loader_vp",
@@ -9,7 +10,8 @@ ui_vapor <- fluidPage(
     p(
       "Loading . . .",
       style = "padding-top: 5px;"
-    )
+    ),
+    style="display: block;"
     
   ),
   column(

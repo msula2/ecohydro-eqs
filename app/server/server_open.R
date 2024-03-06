@@ -1,6 +1,9 @@
 # server_open.R
 open_server <- function(input, output, session) {
   
+  delay(3500, hide("loader_background_op"))
+  delay(3500, hide("loader_op"))
+  
   v <- reactiveValues(
     vars_plot = NULL,
     vars_def = NULL,
