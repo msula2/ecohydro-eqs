@@ -1,7 +1,6 @@
-# server_penman.R
+# server_monteith.R
 
-penman_server <- function(input, output, session) {
-  
+monteith_server <- function(input, output, session) {
   v <- reactiveValues(
     vars_plot = NULL,
     vars_def = NULL,
@@ -16,60 +15,103 @@ penman_server <- function(input, output, session) {
   observeEvent(input$navbar,{
     tab <- input$navbar
     vars_eqs <- NULL
-    if (tab == "Penman's Method") {
-      v$vars_plot <- list("\\Delta" = "slope_saturation","R_n"="net_radiation", "G"="ground_heat_flux", "\\lambda" = "latent_heat", "\\gamma" = "psy_constant", "u_2" = "wind_speed", "e_s - e_d" = "vapor_pressure_deficit")
-      v$vars_def <- list("slope_saturation" = "Slope of the saturation vapor pressure curve with respect to temperature","net_radiation" = "Net Radiation", "ground_heat_flux"="Ground Heat Flux", "latent_heat"="Latent Heat of Vaporation", "psy_constant"="Psychometric Constant", "wind_speed"="Wind Speed 2m above ground", "vapor_pressure_deficit" = "Vapor Pressure Deficit")
-      v$output_var <- list(id = "evapo_transpiration", value = "ET_o")  
+    if (tab == "Penman-Monteith Method") {
+      v$vars_plot <- list("\\Delta" = "slope_saturation_pm","R_n"="net_radiation_pm", "G"="ground_heat_flux_pm", "\\gamma" = "psy_constant_pm", "u_2" = "wind_speed_pm", "e_s - e_a" = "vapor_pressure_deficit_pm")
+      v$vars_def <- list("slope_saturation_pm" = "Slope of the saturation vapor pressure curve with respect to temperature","net_radiation_pm" = "Net Radiation", "ground_heat_flux_pm"="Ground Heat Flux", "psy_constant_pm"="Psychometric Constant", "wind_speed_pm"="Wind Speed 2m above ground", "vapor_pressure_deficit_pm" = "Vapor Pressure Deficit")
+      v$output_var <- list(id = "ref_evapo_transpiration", value = "ET_o")  
       v$vars_eqs <- c(names(v$vars_def), v$output_var$id)
-      v$vars_axis <- list("slope_saturation" = "Slope saturation (kPa/°C)","net_radiation" = "Net Radiation (MJ/m²/d )", "ground_heat_flux"="Ground Heat Flux (MJ/m²/d )", "latent_heat"="Latent Heat of Vaporation (MJ/kg)", "psy_constant"="Psychometric Constant (kPa/°C)", "wind_speed"="Wind Speed 2m above ground (m/s)", "vapor_pressure_deficit" = "Vapor Pressure Deficit", "evapo_transpiration" = "Evapotranspiration (mm/day)")
+      v$vars_axis <- list("slope_saturation_pm" = "Slope saturation (kPa/°C)","net_radiation_pm" = "Net Radiation (MJ/m²/d )", "ground_heat_flux_pm"="Ground Heat Flux (MJ/m²/d )", "psy_constant_pm"="Psychometric Constant (kPa/°C)", "wind_speed_pm"="Wind Speed 2m above ground (m/s)", "vapor_pressure_deficit_pm" = "Saturation Vapor Pressure Deficit", "ref_evapo_transpiration" = "Reference Evapotranspiration (mm/day)")
     }
     
   })
   
-  output$set_temperatures <- renderUI({
+  output$set_monthly_data_pm <- renderUI({
     box(
       width = 12,
       class = "custom-box",
-      title = "Set Altitude & Temperatures",
-      div(
-        style = "display: flex; align-items: center;",
-        div(HTML(katex_html("H", displayMode = FALSE))),
-        div(textInput("H", label = "", value = "", width = "60%"), style="margin-left: 37px;")
-      ),
-      tags$table( 
+      title = "Set Mean Monthly Data",
+      tags$table(
         tags$thead(
           tags$tr(
-            tags$th(
-              style = "text-align: center;"
-            ),
-            tags$th(
-              HTML(katex_html("i-1", displayMode = FALSE)),
-              style = "text-align: center;"
-              
-            ),
-            tags$th(
-              HTML(katex_html("i", displayMode = FALSE)),
-              style = "text-align: center;"
-            ),
-            tags$th(
-              HTML(katex_html("i+1", displayMode = FALSE)),
-              style = "text-align: center;"
-            )
+            tags$th("Parameter", style="width: 30%;"),
+            tags$th("Value", style="width: 40%;"),
+            tags$th("Units", style="width: 30%;")
           )
-        ), 
+        ),
         tags$tbody(
           tags$tr(
-            tags$td(align="center", HTML(katex_html("T", displayMode = FALSE))),
-            tags$td(align="center", textInput("t_prev", label = "", value = "", width = "60%")),
-            tags$td(align="center", textInput("t", label = "", value = "", width = "60%")),
-            tags$td(align="center", textInput("t_aft", label = "", value = "", width = "60%"))
-            
+            tags$td(
+              HTML(katex_html("H", displayMode = FALSE)),
+              tags$i(class = "fa-regular fa-circle-question info", 
+                     style = "margin-left: 5px; color: #2c3e50;", 
+                     `data-toggle` = "tooltip", 
+                     `data-placement` = "right", 
+                     title = "Elevation above sea level")
+            ),
+            tags$td(
+              textInput("H_pm", label = "", value = "", width = "60%"),
+              align="center"
+            ),
+            tags$td(
+              HTML(katex_html("m", displayMode = FALSE))
+            )
+          ),
+          tags$tr(
+            tags$td(
+              HTML(katex_html("e_a", displayMode = FALSE)),
+              tags$i(class = "fa-regular fa-circle-question info", 
+                     style = "margin-left: 5px; color: #2c3e50;", 
+                     `data-toggle` = "tooltip", 
+                     `data-placement` = "right", 
+                     title = "Monthly average daily vapour pressure")
+            ),
+            tags$td(
+              textInput("daily_vapour_pressure_pm", label = "", value = "", width = "60%"),
+              align="center"
+            ),
+            tags$td(
+              HTML(katex_html("kPa", displayMode = FALSE))
+            )
+          ),
+          tags$tr(
+            tags$td(
+              HTML(katex_html("T_i", displayMode = FALSE)),
+              tags$i(class = "fa-regular fa-circle-question info", 
+                     style = "margin-left: 5px; color: #2c3e50;", 
+                     `data-toggle` = "tooltip", 
+                     `data-placement` = "right", 
+                     title = "Mean monthly average temperature of current month")
+            ),
+            tags$td(
+              textInput("t_pm", label = "", value = "", width = "60%"),
+              align="center"
+            ),
+            tags$td(
+              HTML(katex_html("°C", displayMode = FALSE))
+            )
+          ),
+          tags$tr(
+            tags$td(
+              HTML(katex_html("T_{i-1}", displayMode = FALSE)),
+              tags$i(class = "fa-regular fa-circle-question info", 
+                     style = "margin-left: 5px; color: #2c3e50;", 
+                     `data-toggle` = "tooltip", 
+                     `data-placement` = "right", 
+                     title = "Mean monthly average temperature of previous month")
+            ),
+            tags$td(
+              textInput("t_prev_pm", label = "", value = "", width = "60%"),
+              align="center"
+            ),
+            tags$td(
+              HTML(katex_html("°C", displayMode = FALSE))
+            )
           )
         )
       ),
       fluidRow(
         actionButton(
-          inputId = "submit_temperatures",
+          inputId = "submit_meanmonthly_pm",
           label = HTML("Submit <i class='fas fa-check' style='margin-left: 2px'></i>"),
           class = "submit-btn"
         )  
@@ -79,35 +121,40 @@ penman_server <- function(input, output, session) {
     )
   })
   
-  observeEvent(input$submit_temperatures,{
+  observeEvent(input$submit_meanmonthly_pm,{
     
-    toggle("loader_background_p")
-    toggle("loader_p")
-    delay(3500, hide("loader_background_p"))
-    delay(3500, hide("loader_p"))
+    toggle("loader_background_pm")
+    toggle("loader_pm")
+    delay(3500, hide("loader_background_pm"))
+    delay(3500, hide("loader_pm"))
     
-    t_aft <- as.numeric(input$t_aft)
-    t_prev <- as.numeric(input$t_prev)
-    t <- as.numeric(input$t)
-    H <- as.numeric(input$H)
+    t_mean <- as.numeric(input$t_pm)
+    H <- as.numeric(input$H_pm)
+    specific_heat <- 1.013 * 10^(-3)
+    ratio_molecular_weight <- 0.622
+    latent_heat <- 2.45
+    daily_vapor_pressure <- as.numeric(input$daily_vapour_pressure_pm)
     
-    v[["slope_saturation"]] <- 0.200 * (0.00738 * t + 0.8072)^7 - 0.000116
-    v[["ground_heat_flux"]] <- 4.2 * ((t_aft - t_prev) / 2)
-    v[["latent_heat"]] <- 2.501 - 2.361 * (10^(-3)) * t
-    v[["atmospheric_pressure"]] <- 101.3 - (0.01055 * H)
-    v[["psy_constant"]] <- (0.001013 * v[["atmospheric_pressure"]]) / (0.622 * v[["latent_heat"]])
     
-    output$set_arguments <- renderUI({
+    
+    v[["slope_saturation_pm"]] <- result <- 4098 * (0.6108 * exp((17.27 * t_mean) / (t_mean + 237.3))) / (t_mean + 237.3)^2
+    v[["atmospheric_pressure_pm"]] <- 101.3 * ((293 - 0.0065*H)/(293))^5.26
+    v[["psy_constant_pm"]] <- (specific_heat * v[["atmospheric_pressure_pm"]]) / (ratio_molecular_weight * latent_heat)
+    v[["sat_vapor_pressure_pm"]] <- 0.6108 * exp((17.27 * t_mean) / (t_mean + 237.3))
+    v[["vapor_pressure_deficit_pm"]] <- v[["sat_vapor_pressure_pm"]] - daily_vapor_pressure
+    v[["t_pm"]] <- t_mean
+    
+    output$set_arguments_pm <- renderUI({
       box(
         width = 12,
         class = "custom-box",
         title = "Set Arguments",
-        uiOutput("plot_by"),
-        uiOutput("range_x"),
-        uiOutput("default_values"),
+        uiOutput("plot_by_pm"),
+        uiOutput("range_x_pm"),
+        uiOutput("default_values_pm"),
         fluidRow(
           actionButton(
-            inputId = "submit",
+            inputId = "submit_pm",
             label = HTML("Submit <i class='fas fa-check' style='margin-left: 2px'></i>"),
             class = "submit-btn"
           )  
@@ -118,17 +165,17 @@ penman_server <- function(input, output, session) {
       
     })
     
-    hide("set_temperatures")
-  
+    hide("set_monthly_data_pm")
+    
     
   })
   
   
   
-  output$plot_by <- renderUI({
+  output$plot_by_pm <- renderUI({
     
     updateSelectizeInput(
-      session, "plot_type",
+      session, "plot_type_pm",
       choices = v$vars_plot,
       options = list(
         render = I("
@@ -148,7 +195,7 @@ penman_server <- function(input, output, session) {
     
     fluidRow(
       div(
-        selectizeInput("plot_type", label = "Plot by:", choices = NULL, width = "20%"),
+        selectizeInput("plot_type_pm", label = "Plot by:", choices = NULL, width = "20%"),
         style = "display: flex; align-items: center; margin-left: 20px;"
       )
       
@@ -156,56 +203,9 @@ penman_server <- function(input, output, session) {
     
   })
   
-  observeEvent(input$latent_heat_eqs, {
-    mean_temperature <- as.character(input$t)
-    lambda <- as.character(v$latent_heat)
-    
-    
-    showModal(
-      modalDialog(
-        title = "Calculation",
-        div(
-          p(
-            HTML(paste(
-              "The latent heat of vaporization (MJ/kg), ",
-              katex_html("\\lambda", displayMode = FALSE),
-              "can be computed if the mean temperature is known using: "
-            ))
-          ),
-          HTML(katex_html(
-            "\\lambda = 2.501 - 2.361 × 10^{-3}T",
-            displayMode = TRUE, 
-            preview = FALSE,
-            include_css = TRUE,
-            output = "html"
-          )
-          ),
-          p(
-            HTML(paste(
-              "where ",
-              katex_html("\\lambda", displayMode = FALSE),
-              " is in megajoules per kilogram and ",
-              katex_html("T", displayMode = FALSE),
-              " is the mean temperature in degree Celsius."
-            ))
-          ),
-          p("Given that: "),
-          
-        ),
-        div(
-          HTML(katex_html(paste("T", " = ", mean_temperature, "°C", sep = "~"), displayMode = TRUE)),
-          HTML(katex_html(paste0("\\lambda", " = ", lambda, "~MJ/kg", sep = "~"), displayMode = TRUE))
-        ),
-        footer = tagList(
-          actionButton(inputId = "close", label = "Close", class = "submit-btn")
-        )
-      )
-    )
-  })
-  
-  observeEvent(input$slope_saturation_eqs, {
-    mean_temperature <- as.character(input$t)
-    slope_saturation <- as.character(v$slope_saturation)
+  observeEvent(input$slope_saturation_pm_eqs, {
+    mean_temperature <- as.character(input$t_pm)
+    slope_saturation <- as.character(v$slope_saturation_pm)
     
     showModal(
       modalDialog(
@@ -219,7 +219,7 @@ penman_server <- function(input, output, session) {
             ))
           ),
           HTML(katex_html(
-            "\\Delta = 0.200[0.00738 T + 0.8072]^{7} - 0.000116",
+            "\\Delta = \\frac{4098 (0.6108 e^{(\\frac{17.27T}{T + 237.3})})}{(T + 237.3)^2}",
             displayMode = TRUE, 
             preview = FALSE,
             include_css = TRUE,
@@ -249,13 +249,75 @@ penman_server <- function(input, output, session) {
       )
     )
   })
-  observeEvent(input$psy_constant_eqs, {
-    H <- as.character(input$H)
-    P <- as.character(v$atmospheric_pressure)
-    mean_temperature <- as.character(input$t)
-    lambda <- as.character(v$latent_heat)
-    gamma <- as.character(v$psy_constant)
+  
+  observeEvent(input$vapor_pressure_deficit_pm_eqs, {
+    daily_vapor <- as.character(input$daily_vapour_pressure_pm)
+    sat_vapor <- as.character(v$sat_vapor_pressure_pm)
+    mean_temperature <- as.character(input$t_pm)
+    vapor_pressure_def <- as.character(v$vapor_pressure_deficit_pm)
     
+    
+    showModal(
+      modalDialog(
+        title = "Calculation",
+        div(
+          p(
+            HTML(paste(
+              "To determine the vapor pressure deficit, we must first determine ",
+              katex_html("e_s", displayMode = FALSE),
+              " , the saturation vapor pressure, which can be computed if the mean air temperature is known using: "
+            ))
+          ),
+          HTML(katex_html(
+            "e_s = 0.6108 e^{\\left(\\frac{17.27T}{T + 237.3}\\right)}",
+            displayMode = TRUE, 
+            preview = FALSE,
+            include_css = TRUE,
+            output = "html"
+          )
+          ),
+          p(
+            HTML(paste(
+              "where ",
+              katex_html("e_s", displayMode = FALSE),
+              " is in kilopascals and ",
+              katex_html("T", displayMode = FALSE),
+              " is the mean air temperature in degree Celsius."
+            ))
+          ),
+          p(
+            "Given that: "
+          )
+        ),
+        div(
+          HTML(katex_html(paste("T", " = ", mean_temperature, "°C", sep = "~"), displayMode = TRUE)),
+          HTML(katex_html(paste0("e_s", " = ", sat_vapor, "~kPa", sep = "~"), displayMode = TRUE)),
+          HTML(katex_html(paste0("e_a", " = ", daily_vapor, "~kPa", sep = "~"), displayMode = TRUE))
+        ),
+        p(
+          HTML(paste(
+            "We can determine the vapor pressure deficit, using the following equation: "
+          ))
+        ),
+        HTML(katex_html(
+          paste("e_s - e_a = ", vapor_pressure_def , "~kPa"),
+          displayMode = TRUE, 
+          preview = FALSE,
+          include_css = TRUE,
+          output = "html"
+        )
+        ),
+        footer = tagList(
+          actionButton(inputId = "close", label = "Close", class = "submit-btn")
+        )
+      )
+    )
+  })
+  
+  observeEvent(input$psy_constant_pm_eqs, {
+    H <- as.character(input$H_pm)
+    P <- as.character(v$atmospheric_pressure_pm)
+    gamma <- as.character(v$psy_constant_pm)
     
     
     showModal(
@@ -266,11 +328,11 @@ penman_server <- function(input, output, session) {
             HTML(paste(
               "To calculate the psychrometric constant, we must first calculate ",
               katex_html("P", displayMode = FALSE),
-              ", the atmospheric pressure that Doorenbos and Pruitt (1977) suggested could be calculated using:"
+              ", the atmospheric pressure using:"
             ))
           ),
           HTML(katex_html(
-            "P = 101.3−0.01055H",
+            "P = 101.3\\left( \\frac{293 - 0.0065H}{293} \\right)^{5.26}",
             displayMode = TRUE, 
             preview = FALSE,
             include_css = TRUE,
@@ -297,37 +359,18 @@ penman_server <- function(input, output, session) {
         div(
           p(
             HTML(paste(
-              "Next, we need to determine ",
-              katex_html("\\lambda", displayMode = FALSE),
-              " , the latent heat of vaporization (MJ/kg) using the following equation: "
-            ))
-          ),
-          HTML(katex_html(
-            "\\lambda = 2.501 - 2.361 × 10^{-3}T",
-            displayMode = TRUE, 
-            preview = FALSE,
-            include_css = TRUE,
-            output = "html"
-          )
-          ),
-          p("Given that: "),
-          
-        ),
-        div(
-          HTML(katex_html(paste("T", " = ", mean_temperature, "°C", sep = "~"), displayMode = TRUE)),
-          HTML(katex_html(paste0("\\lambda", " = ", lambda, "~MJ/kg", sep = "~"), displayMode = TRUE))
-        ),
-        div(
-          p(
-            HTML(paste(
               "Using ",
-              katex_html(paste("P", "\\lambda", "c_{p}", sep = ","), displayMode = FALSE),
+              katex_html(paste("P", "c_{p}", sep = ","), displayMode = FALSE),
               " the specific heat of water at constant pressure (0.001013 kJ/kg/°C),",
-              " the psychrometric constant (in kPa/°C) can be calculated using:"
+              katex_html("\\lambda", displayMode = FALSE),
+              " the latent heat of vaporization (2.45 MJ/kg/°C),",
+              katex_html("\\varepsilon", displayMode = FALSE),
+              " ratio molecular weight of water vapour/dry air (0.622),",
+              " the psychrometric constant (in kPa/°C) can be calculated with the equation:"
             ))
           ),
           HTML(katex_html(
-            paste("\\gamma = \\frac{c_pP}{0.622\\lambda} = ", gamma , "~kPa/°C"),
+            paste("\\gamma = \\frac{c_pP}{\\varepsilon \\lambda} = ", gamma , "~kPa/°C"),
             displayMode = TRUE, 
             preview = FALSE,
             include_css = TRUE,
@@ -342,69 +385,10 @@ penman_server <- function(input, output, session) {
     )
   })
   
-  
-  observeEvent(input$ground_heat_flux_eqs, {
-    t_aft <- as.character(input$t_aft)
-    t_prev <- as.character(input$t_prev)
-    G <- as.character(v$ground_heat_flux)
+  observeEvent(input$plot_type_pm,{
     
-    showModal(
-      modalDialog(
-        title = "Calculation",
-        div(
-          p(
-            HTML(paste(
-              "The heat flux density to the ground, ",
-              katex_html("G", displayMode = FALSE),
-              " in (MJ/m/d) can be computed when the mean air temperature for the time period before and after the period of interest is known:"
-            ))
-          ),
-          HTML(katex_html(
-            "G = 4.2\\frac{T_{i+1} - T_{i-1}}{\\Delta t}",
-            displayMode = TRUE, 
-            preview = FALSE,
-            include_css = TRUE,
-            output = "html"
-          )
-          ),
-          p(
-            HTML(paste(
-              "where ",
-              katex_html("T", displayMode = FALSE),
-              " is the mean air temperature in ",
-              katex_html("°C", displayMode = FALSE), 
-              "for time period ",
-              katex_html("i + 1", displayMode = FALSE),
-              " and ",
-              katex_html("i - 1", displayMode = FALSE), 
-              " and ",
-              katex_html("\\Delta t", displayMode = FALSE),
-              " is the time in days between the mid-points of the two time periods."
-            ))
-          ),
-          p(
-            "Given that: "
-          )
-        ),
-        div(
-          HTML(katex_html(paste("T_{i+1}", " = ", t_aft, "~°C", sep = "~"), displayMode = TRUE)),
-          HTML(katex_html(paste0("T_{i-1}", " = ", t_prev, "~°C", sep = "~"), displayMode = TRUE)),
-          HTML(katex_html(paste0("\\Delta t", " = ", "2", sep = "~"), displayMode = TRUE)),
-          HTML(katex_html(paste0("G", " = ", G, "~MJ/m/d", sep = "~"), displayMode = TRUE))
-          
-        ),
-        footer = tagList(
-          actionButton(inputId = "close", label = "Close", class = "submit-btn")
-        )
-      )
-    )
-  })
-  
-  
-  observeEvent(input$plot_type,{
-    
-    output$definition <- renderUI({
-      def <- v$vars_def[[input$plot_type]]
+    output$definition_pm <- renderUI({
+      def <- v$vars_def[[input$plot_type_pm]]
       label_html <- sprintf('<i class="fa-regular fa-circle-question info" data-toggle="tooltip" data-placement="right" title="%s"></i>', def)
       div(
         HTML(label_html),
@@ -413,21 +397,21 @@ penman_server <- function(input, output, session) {
       
     })
     
-    output$range_x <- renderUI({
-      def <- v$vars_def[[input$plot_type]]
+    output$range_x_pm <- renderUI({
+      def <- v$vars_def[[input$plot_type_pm]]
       mapping <- setNames(names(v$vars_plot), v$vars_plot)
-      x_value <- mapping[input$plot_type]
+      x_value <- mapping[input$plot_type_pm]
       if (!is.null(x_value)){
         label_html <- paste0(
           katex_html(x_value, displayMode = FALSE),
           sprintf('<i class="fa-regular fa-circle-question info" style="margin-left: 5px;" data-toggle="tooltip" data-placement="right" title="%s"></i>', def)
         )
-        if (input$plot_type == "slope_saturation" || input$plot_type == "psy_constant" || input$plot_type == "ground_heat_flux" || input$plot_type == "latent_heat"){
-          min_box <- textInput("min", label = "", value = v[[input$plot_type]], width = "10%")
+        if (input$plot_type_pm == "slope_saturation_pm" || input$plot_type_pm == "psy_constant_pm" || input$plot_type_pm == "vapor_pressure_deficit_pm"){
+          min_box <- textInput("min_pm", label = "", value = v[[input$plot_type_pm]], width = "10%")
           
         }
         else{
-          min_box <- textInput("min", label = "", value = "", width = "10%")
+          min_box <- textInput("min_pm", label = "", value = "", width = "10%")
         }
         div(
           style = "display: flex; align-items: center; justify-content: center;",
@@ -435,23 +419,23 @@ penman_server <- function(input, output, session) {
           div(HTML(katex_html("\\leq", displayMode = FALSE)),  style = "margin-left: 15px;"),
           div(HTML(label_html), style = "margin-left: 15px;"),
           div(HTML(katex_html("\\leq", displayMode = FALSE)),  style = "margin-left: 15px; margin-right: 15px;"),
-          textInput("max", label = "", value = "", width = "10%")
+          textInput("max_pm", label = "", value = "", width = "10%")
         )
         
       }
       
     })
     
-    output$default_values <- renderUI({
+    output$default_values_pm <- renderUI({
       mapping <- setNames(names(v$vars_plot), v$vars_plot)
       inputs <- lapply(names(mapping), function(var_id) {
-        if (var_id != input$plot_type) {
+        if (var_id != input$plot_type_pm) {
           def <- v$vars_def[[var_id]]
           label_html <- paste0(
             katex_html(mapping[var_id], displayMode = FALSE),
             sprintf('<i class="fa-regular fa-circle-question info" style="margin-left: 5px;" data-toggle="tooltip" data-placement="right" title="%s"></i>', def)
           )
-          if (var_id == "slope_saturation" || var_id == "psy_constant" || var_id == "ground_heat_flux" || var_id == "latent_heat"){
+          if (var_id == "slope_saturation_pm" || var_id == "psy_constant_pm" || var_id == "vapor_pressure_deficit_pm"){
             return(
               column(
                 width = 4,
@@ -492,25 +476,24 @@ penman_server <- function(input, output, session) {
     })
     
   })
-
   
   
-  observeEvent(input$submit, {
+  observeEvent(input$submit_pm, {
     
-    toggle("loader_background_p")
-    toggle("loader_p")
-    delay(3500, hide("loader_background_p"))
-    delay(3500, hide("loader_p"))
+    toggle("loader_background_pm")
+    toggle("loader_pm")
+    delay(3500, hide("loader_background"))
+    delay(3500, hide("loader_pm"))
     
     v$data <- NULL
-    x_axis_values <- seq(input$min, input$max, length.out = 10)
+    x_axis_values <- seq(input$min_pm, input$max_pm, length.out = 10)
     dependent_var <- v$output_var$id
     
-    default_vars <- setdiff(names(v$vars_def), input$plot_type)
+    default_vars <- setdiff(names(v$vars_def), input$plot_type_pm)
     for (dv in default_vars){
       v[[dv]] <- as.numeric(input[[dv]])
     }
-    independent_var <- input$plot_type
+    independent_var <- input$plot_type_pm
     
     v[[independent_var]] <- x_axis_values
     
@@ -518,13 +501,11 @@ penman_server <- function(input, output, session) {
     result_df <- data.frame(matrix(ncol = length(v$vars_eqs), nrow = length(x_axis_values)))
     colnames(result_df) <- v$vars_eqs
     
-    if (dependent_var == "evapo_transpiration"){
-      y_axis_values <- (v$slope_saturation / (v$slope_saturation + v$psy_constant)) * (v$net_radiation - v$ground_heat_flux) + (((v$psy_constant / (v$slope_saturation + v$psy_constant)) * 6.43 * (1.0 + 0.53 * v$wind_speed) * (v$vapor_pressure_deficit)) / v$latent_heat)
+    y_axis_values <- (0.408 * v$slope_saturation_pm * (v$net_radiation_pm - v$ground_heat_flux_pm) + v$psy_constant_pm * (900 / (v$t_pm + 273)) * v$wind_speed_pm * v$vapor_pressure_deficit_pm) / (v$slope_saturation_pm + v$psy_constant_pm *(1 + 0.34 * v$wind_speed_pm))
       
-    }
     
     for (j in seq_along(v$vars_eqs)) {
-      if (v$vars_eqs[j] == input$plot_type) {
+      if (v$vars_eqs[j] == input$plot_type_pm) {
         result_df[, v$vars_eqs[j]] <- x_axis_values
       } else if (v$vars_eqs[j] == dependent_var) {
         result_df[, v$vars_eqs[j]] <- y_axis_values
@@ -536,21 +517,21 @@ penman_server <- function(input, output, session) {
     v$data <- result_df
     
     
-    output$plot_box <- renderUI({
-      t_aft <- as.character(input$t_aft)
-      t_prev <- as.character(input$t_prev)
-      t <- as.character(input$t)
-      H <- as.character(input$H)
+    output$plot_box_pm <- renderUI({
+      t <- as.character(input$t_pm)
+      H <- as.character(input$H_pm)
+      daily_vapor_pressure <- as.character(input$daily_vapour_pressure_pm)
+      
       box(
         width = 12, title = "Results", class = "custom-box",
-        actionButton(inputId = "reset", label = "Reset", class = "reset-btn"),
+        actionButton(inputId = "reset_pm", label = "Reset", class = "reset-btn"),
         tabBox(
           width = NULL,
-          id = "results_tab",
+          id = "results_tab_pm",
           title = "",
           tabPanel(
             title = "Graph",
-            plotlyOutput("plot_relationship")
+            plotlyOutput("plot_relationship_pm")
           ),
           tabPanel(
             title = "Summary",
@@ -564,15 +545,13 @@ penman_server <- function(input, output, session) {
                   HTML(paste(
                     HTML(katex_html(paste("~T", " = ", t, "~°C~", sep = "~"), displayMode = FALSE)),
                     " , ",
-                    HTML(katex_html(paste("T~_{i+1}", " = ", t_aft, "~°C~", sep = "~"), displayMode = FALSE)), 
-                    " , ",
-                    HTML(katex_html(paste("~T_{i-1}", " = ", t_prev, "~°C~", sep = "~"), displayMode = FALSE)),
+                    HTML(katex_html(paste("~e_a", " = ", daily_vapor_pressure, "~kPa~", sep = "~"), displayMode = FALSE)),
                     " and ",
                     HTML(katex_html(paste("~H", " = ", H, "~m~", sep = "~"), displayMode = FALSE))
                   ))
                 ),
               ),
-              uiOutput("args_table"),
+              uiOutput("args_table_pm"),
               style = "overflow-x: auto; overflow-y: auto; width: 100%; background-color: white !important; padding: 15px;"
             )
           )
@@ -583,7 +562,7 @@ penman_server <- function(input, output, session) {
     })
     
     
-    output$args_table <- renderUI(
+    output$args_table_pm <- renderUI(
       {
         default_table <- v$data %>% 
           select(all_of(default_vars)) %>% 
@@ -633,7 +612,7 @@ penman_server <- function(input, output, session) {
       }
     )
     
-    output$plot_relationship <- renderPlotly({
+    output$plot_relationship_pm <- renderPlotly({
       if (nrow(v$data)) {
         x_axis_title <- v$vars_axis[[independent_var]]
         y_axis_title <- v$vars_axis[[dependent_var]]
@@ -659,27 +638,5 @@ penman_server <- function(input, output, session) {
     show("plot_box")
     
     
-  })
-  
-  observeEvent(input$close,{
-    removeModal()
-  })
-  
-  observeEvent(input$reset,{
-    hide("plot_box")
-    for (rv in v$vars_eqs){
-      v[[rv]] <- NULL
-      if (rv != v$output_var$id){
-        if (rv != input$plot_type){
-          updateTextInput(session, rv, value = "")
-        }
-        else{
-          updateTextInput(session, "min", value = "")
-          updateTextInput(session, "max", value = "")
-        }
-      }
-      
-    }
-    show("set_arguments")
   })
 }

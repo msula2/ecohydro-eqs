@@ -143,6 +143,12 @@ pan_server <- function(input, output, session) {
   
   
   observeEvent(input$submit_pan, {
+    
+    toggle("loader_background_pn")
+    toggle("loader_pn")
+    delay(3500, hide("loader_background_pn"))
+    delay(3500, hide("loader_pn"))
+    
     v$data <- NULL
     x_axis_values <- seq(input$min_pan, input$max_pan, length.out = 10)
     dependent_var <- v$output_var$id

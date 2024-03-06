@@ -97,6 +97,10 @@ criddle_server <- function(input, output, session) {
   
   observeEvent(input$submit_criddle_data, {
     
+    toggle("loader_background_cr")
+    toggle("loader_cr")
+    delay(3500, hide("loader_background_cr"))
+    delay(3500, hide("loader_cr"))
     
     output$criddle_results <- renderUI({
       

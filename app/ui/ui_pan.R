@@ -1,5 +1,17 @@
 ui_pan <- fluidPage(
   useShinyjs(),
+  div(
+    id = "loader_background_pn"
+  ),
+  div(
+    id = "loader_pn",
+    icon("drum-steelpan", class="fas", style = "font-size: 125px;"),
+    p(
+      "Loading . . .",
+      style = "padding-top: 5px;"
+    )
+    
+  ),
   column(
     width = 5,
     box(
