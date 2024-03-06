@@ -2,6 +2,9 @@
 
 penman_server <- function(input, output, session) {
   
+  delay(3500, hide("loader_background_p"))
+  delay(3500, hide("loader_p"))
+  
   v <- reactiveValues(
     vars_plot = NULL,
     vars_def = NULL,

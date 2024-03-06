@@ -1,6 +1,9 @@
 # server_vapor.R
 vapor_server <- function(input, output, session) {
   
+  delay(3500, hide("loader_background_vp"))
+  delay(3500, hide("loader_vp"))
+  
   v <- reactiveValues(
     data_vpd = data.frame(Hour = numeric(0),
                           T = numeric(0),

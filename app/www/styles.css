@@ -124,13 +124,13 @@ th {
 }
 
 #loader_background_pm, #loader_background_p, #loader_background_vp, #loader_background_cr, #loader_background_op, #loader_background_pn{
-  height: 100vh; 
+  height: calc(100vh - 60px);
   width: 100%; 
   background-color: #d0b4a0; 
-  z-index: 500; 
+  z-index: 1000; 
   display: none; 
   position: fixed; 
-  top: 0; 
+  top: 60px; 
   left: 0; 
   margin: 0; 
   padding: 0;  
@@ -144,7 +144,7 @@ th {
   display: none;
   text-align: center;
   animation: pulse 1.5s infinite;
-  z-index: 1000;
+  z-index: 2000;
   top: 40%;
   left: 45%;
   font-size: 20px;

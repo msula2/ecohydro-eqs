@@ -1,7 +1,8 @@
 ui_pan <- fluidPage(
   useShinyjs(),
   div(
-    id = "loader_background_pn"
+    id = "loader_background_pn",
+    style="display: block;"
   ),
   div(
     id = "loader_pn",
@@ -9,7 +10,8 @@ ui_pan <- fluidPage(
     p(
       "Loading . . .",
       style = "padding-top: 5px;"
-    )
+    ),
+    style="display: block;"
     
   ),
   column(
